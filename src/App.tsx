@@ -6,17 +6,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { GameProvider } from "@/context/GameContext";
 import { AppLayout } from "@/components/AppLayout";
-import { IncomingEffectPopup } from "@/components/effects/IncomingEffectPopup";
 import Dashboard from "./pages/Dashboard";
 import Timetable from "./pages/Timetable";
 import Tasks from "./pages/Tasks";
 import FocusMode from "./pages/FocusMode";
 import Achievements from "./pages/Achievements";
 import Shop from "./pages/Shop";
-import Friends from "./pages/Friends";
-import Leaderboard from "./pages/Leaderboard";
 import Settings from "./pages/Settings";
-import UserProfile from "./pages/UserProfile";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
