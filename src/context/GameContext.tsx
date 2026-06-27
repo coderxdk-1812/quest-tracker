@@ -585,17 +585,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
         .single();
 
-      // Check if user is currently silenced
-      const { data: silenceEffects } = await supabase
-        .from('active_effects')
-        .select('id, expires_at')
-        .eq('user_id', user.id)
-        .eq('type', 'silence')
-        .eq('consumed', false);
-      const nowMs = Date.now();
-      const isSilenced = (silenceEffects || []).some(
-        e => !e.expires_at || new Date(e.expires_at).getTime() > nowMs
-      );
+      const isSilenced = false;
 
       const loadedState: Partial<GameState> = { isSilenced };
 
