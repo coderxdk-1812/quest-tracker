@@ -20,8 +20,6 @@ const navItems = [
   { title: 'Focus Mode', url: '/focus', icon: Target },
   { title: 'Achievements', url: '/achievements', icon: Trophy },
   { title: 'Shop', url: '/shop', icon: ShoppingBag },
-  { title: 'Friends', url: '/friends', icon: Users },
-  { title: 'Leaderboard', url: '/leaderboard', icon: Award },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
 
