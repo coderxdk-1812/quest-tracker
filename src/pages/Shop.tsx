@@ -10,8 +10,6 @@ const CATEGORIES = [
   { id: 'powerup' as const,  label: 'Power-Ups', icon: Zap },
   { id: 'theme' as const,    label: 'Themes',    icon: Palette },
   { id: 'badges' as const,   label: 'Badges',    icon: Award },
-  { id: 'social' as const,   label: 'Social',    icon: Users },
-  { id: 'rivalry' as const,  label: 'Rivalry',   icon: Swords },
   { id: 'avatars' as const,  label: 'Avatars',   icon: Sparkles },
 ];
 
