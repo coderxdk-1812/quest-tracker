@@ -26,7 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {state.darkMode ? '☀️' : '🌙'}
               </button>
               <ThemeSwitcher />
-              <NotificationBell />
+              
               <div className="flex items-center gap-1 text-sm font-medium">
                 <span className="text-lg">🔥</span>
                 <span className="text-streak font-bold">{state.streak}</span>
