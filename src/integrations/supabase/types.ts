@@ -20,6 +20,7 @@ export type Database = {
           claimed: Json
           created_at: string
           expires_at: string
+          generated_at: string
           id: string
           quests: Json
           updated_at: string
@@ -30,6 +31,7 @@ export type Database = {
           claimed?: Json
           created_at?: string
           expires_at: string
+          generated_at?: string
           id?: string
           quests?: Json
           updated_at?: string
@@ -40,6 +42,7 @@ export type Database = {
           claimed?: Json
           created_at?: string
           expires_at?: string
+          generated_at?: string
           id?: string
           quests?: Json
           updated_at?: string
@@ -49,11 +52,18 @@ export type Database = {
       }
       game_state: {
         Row: {
+          active_boosts: Json
+          active_theme: string
+          ai_tokens_used: number
           coins: number
           created_at: string
+          dark_mode: boolean
+          earned_badges: string[]
+          equipped_badge: string | null
           focus_sessions_completed: number
           last_active_date: string | null
           level: number
+          purchased_items: string[]
           streak: number
           streak_freezes: number
           total_tasks_completed: number
@@ -62,11 +72,18 @@ export type Database = {
           xp: number
         }
         Insert: {
+          active_boosts?: Json
+          active_theme?: string
+          ai_tokens_used?: number
           coins?: number
           created_at?: string
+          dark_mode?: boolean
+          earned_badges?: string[]
+          equipped_badge?: string | null
           focus_sessions_completed?: number
           last_active_date?: string | null
           level?: number
+          purchased_items?: string[]
           streak?: number
           streak_freezes?: number
           total_tasks_completed?: number
@@ -75,11 +92,18 @@ export type Database = {
           xp?: number
         }
         Update: {
+          active_boosts?: Json
+          active_theme?: string
+          ai_tokens_used?: number
           coins?: number
           created_at?: string
+          dark_mode?: boolean
+          earned_badges?: string[]
+          equipped_badge?: string | null
           focus_sessions_completed?: number
           last_active_date?: string | null
           level?: number
+          purchased_items?: string[]
           streak?: number
           streak_freezes?: number
           total_tasks_completed?: number
@@ -102,7 +126,14 @@ export type Database = {
           equipped_badge: string | null
           id: string
           purchased_items: string[]
+          show_badges: boolean
+          show_level: boolean
+          show_streak: boolean
+          show_tasks_completed: boolean
+          show_xp: boolean
           updated_at: string
+          user_id: string | null
+          username: string | null
         }
         Insert: {
           active_aura?: string | null
@@ -116,7 +147,14 @@ export type Database = {
           equipped_badge?: string | null
           id: string
           purchased_items?: string[]
+          show_badges?: boolean
+          show_level?: boolean
+          show_streak?: boolean
+          show_tasks_completed?: boolean
+          show_xp?: boolean
           updated_at?: string
+          user_id?: string | null
+          username?: string | null
         }
         Update: {
           active_aura?: string | null
@@ -130,31 +168,50 @@ export type Database = {
           equipped_badge?: string | null
           id?: string
           purchased_items?: string[]
+          show_badges?: boolean
+          show_level?: boolean
+          show_streak?: boolean
+          show_tasks_completed?: boolean
+          show_xp?: boolean
           updated_at?: string
+          user_id?: string | null
+          username?: string | null
         }
         Relationships: []
       }
       task_completions: {
         Row: {
+          coins_granted: number
+          completed_at: string
           completed_on: string
           created_at: string
           id: string
+          reversed: boolean
           task_id: string | null
           user_id: string
+          xp_granted: number
         }
         Insert: {
+          coins_granted?: number
+          completed_at?: string
           completed_on?: string
           created_at?: string
           id?: string
+          reversed?: boolean
           task_id?: string | null
           user_id: string
+          xp_granted?: number
         }
         Update: {
+          coins_granted?: number
+          completed_at?: string
           completed_on?: string
           created_at?: string
           id?: string
+          reversed?: boolean
           task_id?: string | null
           user_id?: string
+          xp_granted?: number
         }
         Relationships: [
           {
@@ -217,6 +274,7 @@ export type Database = {
       timetable_entries: {
         Row: {
           created_at: string
+          day: number | null
           days: number[]
           end_time: string
           id: string
@@ -232,6 +290,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          day?: number | null
           days?: number[]
           end_time: string
           id?: string
@@ -247,6 +306,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          day?: number | null
           days?: number[]
           end_time?: string
           id?: string
