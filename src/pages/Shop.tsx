@@ -1,19 +1,15 @@
 import { useState } from 'react';
 import { useGame, SHOP_ITEMS, EARNABLE_BADGES, type ShopItem, type ThemeId, type ActiveBoost } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Users, Swords, Sparkles, Clock } from 'lucide-react';
+import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Sparkles, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { SocialTab } from '@/components/shop/SocialTab';
-import { RivalryTab } from '@/components/shop/RivalryTab';
 import { AvatarsTab } from '@/components/shop/AvatarsTab';
 
 const CATEGORIES = [
   { id: 'powerup' as const,  label: 'Power-Ups', icon: Zap },
   { id: 'theme' as const,    label: 'Themes',    icon: Palette },
   { id: 'badges' as const,   label: 'Badges',    icon: Award },
-  { id: 'social' as const,   label: 'Social',    icon: Users },
-  { id: 'rivalry' as const,  label: 'Rivalry',   icon: Swords },
   { id: 'avatars' as const,  label: 'Avatars',   icon: Sparkles },
 ];
 
@@ -193,8 +189,6 @@ export default function Shop() {
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeCategory === cat.id
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : cat.id === 'rivalry'
-                ? 'bg-muted text-muted-foreground hover:bg-red-500/10 hover:text-red-500'
                 : 'bg-muted text-muted-foreground hover:bg-secondary'
             }`}
           >
@@ -204,8 +198,6 @@ export default function Shop() {
         ))}
       </div>
 
-      {activeCategory === 'social'   && <SocialTab />}
-      {activeCategory === 'rivalry'  && <RivalryTab />}
       {activeCategory === 'avatars'  && <AvatarsTab />}
 
       {/* Badges */}

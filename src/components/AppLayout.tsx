@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useGame } from '@/context/GameContext';
-import { NotificationBell } from '@/components/NotificationBell';
+
 import { NotificationScheduler } from '@/hooks/useNotificationScheduler';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
@@ -26,7 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {state.darkMode ? '☀️' : '🌙'}
               </button>
               <ThemeSwitcher />
-              <NotificationBell />
+              
               <div className="flex items-center gap-1 text-sm font-medium">
                 <span className="text-lg">🔥</span>
                 <span className="text-streak font-bold">{state.streak}</span>
