@@ -125,12 +125,17 @@ export type Database = {
           earned_badges: string[]
           equipped_badge: string | null
           id: string
+          notification_overrides: Json
+          notification_settings: Json
           purchased_items: string[]
+          saved_subjects: Json
           show_badges: boolean
           show_level: boolean
           show_streak: boolean
           show_tasks_completed: boolean
           show_xp: boolean
+          task_durations: Json
+          task_links: Json
           updated_at: string
           user_id: string | null
           username: string | null
@@ -146,12 +151,17 @@ export type Database = {
           earned_badges?: string[]
           equipped_badge?: string | null
           id: string
+          notification_overrides?: Json
+          notification_settings?: Json
           purchased_items?: string[]
+          saved_subjects?: Json
           show_badges?: boolean
           show_level?: boolean
           show_streak?: boolean
           show_tasks_completed?: boolean
           show_xp?: boolean
+          task_durations?: Json
+          task_links?: Json
           updated_at?: string
           user_id?: string | null
           username?: string | null
@@ -167,12 +177,17 @@ export type Database = {
           earned_badges?: string[]
           equipped_badge?: string | null
           id?: string
+          notification_overrides?: Json
+          notification_settings?: Json
           purchased_items?: string[]
+          saved_subjects?: Json
           show_badges?: boolean
           show_level?: boolean
           show_streak?: boolean
           show_tasks_completed?: boolean
           show_xp?: boolean
+          task_durations?: Json
+          task_links?: Json
           updated_at?: string
           user_id?: string | null
           username?: string | null
@@ -187,6 +202,7 @@ export type Database = {
           created_at: string
           id: string
           reversed: boolean
+          reversed_at: string | null
           task_id: string | null
           user_id: string
           xp_granted: number
@@ -198,6 +214,7 @@ export type Database = {
           created_at?: string
           id?: string
           reversed?: boolean
+          reversed_at?: string | null
           task_id?: string | null
           user_id: string
           xp_granted?: number
@@ -209,6 +226,7 @@ export type Database = {
           created_at?: string
           id?: string
           reversed?: boolean
+          reversed_at?: string | null
           task_id?: string | null
           user_id?: string
           xp_granted?: number
