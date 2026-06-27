@@ -189,8 +189,6 @@ export default function Shop() {
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeCategory === cat.id
                 ? 'bg-primary text-primary-foreground shadow-md'
-                : cat.id === 'rivalry'
-                ? 'bg-muted text-muted-foreground hover:bg-red-500/10 hover:text-red-500'
                 : 'bg-muted text-muted-foreground hover:bg-secondary'
             }`}
           >
@@ -200,8 +198,6 @@ export default function Shop() {
         ))}
       </div>
 
-      {activeCategory === 'social'   && <SocialTab />}
-      {activeCategory === 'rivalry'  && <RivalryTab />}
       {activeCategory === 'avatars'  && <AvatarsTab />}
 
       {/* Badges */}
