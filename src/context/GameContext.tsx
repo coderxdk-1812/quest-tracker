@@ -760,39 +760,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (completing) {
       let { xp, coins } = computeTaskReward(task, state.activeBoosts);
 
-      // --- XP Tax interception ---
-      try {
-        const { data: taxes } = await supabase
-          .from('active_effects')
-          .select('id, source_user_id, payload')
-          .eq('user_id', user.id)
-          .eq('type', 'xp_tax_pending')
-          .eq('consumed', false)
-          .order('created_at', { ascending: true })
-          .limit(1);
-        const tax = taxes?.[0];
-        if (tax && xp > 0) {
-          const pct = (tax.payload as any)?.percent ?? 5;
-          const stolen = Math.max(1, Math.floor((xp * pct) / 100));
-          xp = xp - stolen;
-          await supabase.from('active_effects').update({ consumed: true }).eq('id', tax.id);
-          if (tax.source_user_id) {
-            const { data: atkr } = await supabase
-              .from('game_state').select('xp').eq('user_id', tax.source_user_id).single();
-            if (atkr) {
-              const newAtkXp = (atkr.xp || 0) + stolen;
-              await supabase.from('game_state').update({
-                xp: newAtkXp, level: Math.floor(newAtkXp / XP_PER_LEVEL) + 1,
-              }).eq('user_id', tax.source_user_id);
-            }
-            await supabase.from('notifications').insert({
-              user_id: tax.source_user_id, type: 'xp_tax',
-              message: `💸 Your XP Tax just paid out — you stole ${stolen} XP!`,
-              data: { stolen },
-            });
-          }
-        }
-      } catch (e) { console.error('XP Tax interception failed', e); }
+      // PvP layer removed for v1 — no XP-tax interception.
+
 
       // --- All-In resolution ---
       const allIn = state.activeBoosts.find(
