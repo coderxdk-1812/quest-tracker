@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useGame, SHOP_ITEMS, EARNABLE_BADGES, type ShopItem, type ThemeId, type ActiveBoost } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Users, Swords, Sparkles, Clock } from 'lucide-react';
+import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Sparkles, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { SocialTab } from '@/components/shop/SocialTab';
-import { RivalryTab } from '@/components/shop/RivalryTab';
 import { AvatarsTab } from '@/components/shop/AvatarsTab';
 
 const CATEGORIES = [
