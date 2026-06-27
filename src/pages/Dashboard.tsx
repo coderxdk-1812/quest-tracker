@@ -4,7 +4,7 @@ import { CheckSquare, Coins, TrendingUp, Brain, Trophy } from 'lucide-react';
 import { DailyQuests } from '@/components/dashboard/DailyQuests';
 import { TodaySchedule } from '@/components/dashboard/TodaySchedule';
 import { StudyHeatmap } from '@/components/dashboard/StudyHeatmap';
-import { ActiveEffectsPanel } from '@/components/effects/ActiveEffectsPanel';
+
 import { ProgressionHud } from '@/components/progression/ProgressionHud';
 import { NextMoveCard } from '@/components/dashboard/NextMoveCard';
 import { StreakStatusBanner } from '@/components/dashboard/StreakStatusBanner';
