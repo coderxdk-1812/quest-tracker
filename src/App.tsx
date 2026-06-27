@@ -39,7 +39,6 @@ function ProtectedRoutes() {
   return (
     <GameProvider>
       <AppLayout>
-        <IncomingEffectPopup />
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/timetable" element={<Timetable />} />
@@ -47,9 +46,6 @@ function ProtectedRoutes() {
           <Route path="/focus" element={<FocusMode />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/shop" element={<Shop />} />
-          <Route path="/friends" element={<Friends />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-          <Route path="/profile/:userId" element={<UserProfile />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
