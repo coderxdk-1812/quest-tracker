@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useGame } from '@/context/GameContext';
-import { NotificationBell } from '@/components/NotificationBell';
+
 import { NotificationScheduler } from '@/hooks/useNotificationScheduler';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
