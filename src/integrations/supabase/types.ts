@@ -14,7 +14,254 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_quests: {
+        Row: {
+          baselines: Json
+          claimed: Json
+          created_at: string
+          expires_at: string
+          id: string
+          quests: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          baselines?: Json
+          claimed?: Json
+          created_at?: string
+          expires_at: string
+          id?: string
+          quests?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          baselines?: Json
+          claimed?: Json
+          created_at?: string
+          expires_at?: string
+          id?: string
+          quests?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      game_state: {
+        Row: {
+          coins: number
+          created_at: string
+          focus_sessions_completed: number
+          last_active_date: string | null
+          level: number
+          streak: number
+          streak_freezes: number
+          total_tasks_completed: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          focus_sessions_completed?: number
+          last_active_date?: string | null
+          level?: number
+          streak?: number
+          streak_freezes?: number
+          total_tasks_completed?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          focus_sessions_completed?: number
+          last_active_date?: string | null
+          level?: number
+          streak?: number
+          streak_freezes?: number
+          total_tasks_completed?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          active_aura: string | null
+          active_theme: string
+          avatar_url: string | null
+          created_at: string
+          custom_title: string | null
+          dark_mode: boolean
+          display_name: string | null
+          earned_badges: string[]
+          equipped_badge: string | null
+          id: string
+          purchased_items: string[]
+          updated_at: string
+        }
+        Insert: {
+          active_aura?: string | null
+          active_theme?: string
+          avatar_url?: string | null
+          created_at?: string
+          custom_title?: string | null
+          dark_mode?: boolean
+          display_name?: string | null
+          earned_badges?: string[]
+          equipped_badge?: string | null
+          id: string
+          purchased_items?: string[]
+          updated_at?: string
+        }
+        Update: {
+          active_aura?: string | null
+          active_theme?: string
+          avatar_url?: string | null
+          created_at?: string
+          custom_title?: string | null
+          dark_mode?: boolean
+          display_name?: string | null
+          earned_badges?: string[]
+          equipped_badge?: string | null
+          id?: string
+          purchased_items?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      task_completions: {
+        Row: {
+          completed_on: string
+          created_at: string
+          id: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_on?: string
+          created_at?: string
+          id?: string
+          task_id?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_on?: string
+          created_at?: string
+          id?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          priority: string
+          subject: string | null
+          subject_color: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          subject?: string | null
+          subject_color?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          subject?: string | null
+          subject_color?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      timetable_entries: {
+        Row: {
+          created_at: string
+          days: number[]
+          end_time: string
+          id: string
+          is_recurring: boolean
+          room: string | null
+          specific_date: string | null
+          start_time: string
+          subject: string
+          subject_color: string | null
+          teacher: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days?: number[]
+          end_time: string
+          id?: string
+          is_recurring?: boolean
+          room?: string | null
+          specific_date?: string | null
+          start_time: string
+          subject: string
+          subject_color?: string | null
+          teacher?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days?: number[]
+          end_time?: string
+          id?: string
+          is_recurring?: boolean
+          room?: string | null
+          specific_date?: string | null
+          start_time?: string
+          subject?: string
+          subject_color?: string | null
+          teacher?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
