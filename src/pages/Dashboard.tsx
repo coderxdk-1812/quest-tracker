@@ -89,9 +89,6 @@ export default function Dashboard() {
         <DailyQuests />
       </motion.div>
 
-      <motion.div variants={item}>
-        <ActiveEffectsPanel />
-      </motion.div>
 
       {/* Activity heatmap */}
       <motion.div variants={item}>
