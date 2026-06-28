@@ -12,6 +12,14 @@ export interface StandingRow {
   is_me: boolean;
 }
 
+/** Pull a readable message out of whatever the RPC threw (Supabase errors aren't Error instances). */
+function describe(e: unknown): string {
+  if (!e) return 'Could not load league';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const a = e as any;
+  return a.message || a.error_description || a.hint || a.details || String(a);
+}
+
 /**
  * Loads the caller's weekly-league standings.
  * Ensures membership (promotion/relegation handled server-side) then fetches the bracket.
@@ -31,9 +39,11 @@ export function useLeague() {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rpc = (supabase as any).rpc.bind(supabase);
+
       const join = await rpc('lq_join_league');
       if (join.error) throw join.error;
-      if (join.data?.tier !== undefined) setMyTier(join.data.tier as number);
+      const joinRow = Array.isArray(join.data) ? join.data[0] : join.data;
+      if (joinRow?.tier !== undefined) setMyTier(joinRow.tier as number);
 
       const res = await rpc('lq_standings');
       if (res.error) throw res.error;
@@ -42,7 +52,8 @@ export function useLeague() {
       const mine = rows.find(r => r.is_me);
       if (mine) setMyTier(mine.tier);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not load league');
+      console.error('League load failed:', e);
+      setError(describe(e));
     } finally {
       setLoading(false);
     }
