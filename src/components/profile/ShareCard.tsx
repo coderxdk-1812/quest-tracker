@@ -94,10 +94,6 @@ export function ShareCard() {
           <Download className="h-3.5 w-3.5" /> Download card
         </Button>
       </div>
-        <Button size="sm" className="gap-1.5 flex-1" onClick={downloadCard}>
-          <Download className="h-3.5 w-3.5" /> Download card
-        </Button>
-      </div>
     </div>
   );
 }
