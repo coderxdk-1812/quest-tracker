@@ -8,9 +8,6 @@ import { totalReached } from '@/lib/milestones';
 import { buildShareText, buildShareSvg, type ShareStats } from '@/lib/shareCard';
 import { RankBadge } from '@/components/progression/RankBadge';
 import { Button } from '@/components/ui/button';
-import { buildShareText, buildShareSvg, type ShareStats } from '@/lib/shareCard';
-import { RankBadge } from '@/components/progression/RankBadge';
-import { Button } from '@/components/ui/button';
 
 /**
  * Public, shareable accomplishment card (spec §6). Designed to be proud of and posted
