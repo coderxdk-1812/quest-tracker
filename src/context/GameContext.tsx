@@ -391,23 +391,10 @@ function gameReducer(state: GameState, action: Action): GameState {
       if (state.lastActiveDate === yesterdayStr) {
         newState = { ...state, streak: state.streak + 1, lastActiveDate: today };
       } else if (state.lastActiveDate !== today) {
-        const hasShield = state.activeBoosts.some(
-          b => b.type === 'leaderboard_freeze' && b.expiresAt && new Date(b.expiresAt).getTime() > Date.now()
-        );
-        // Streak Shield covers 2 days — check if last active was 2 days ago
-        const shieldCovers2Days = state.activeBoosts.some(
-          b => b.type === 'leaderboard_freeze' && b.expiresAt && new Date(b.expiresAt).getTime() > Date.now()
-        );
         if (state.streakFreezes > 0 && state.streak > 0) {
-          // Standard freeze: covers 1 missed day
+          // Standard freeze: covers 1 missed day. Two days missed = streak resets.
           if (state.lastActiveDate === dayBeforeYesterdayStr) {
-            // Two days missed — only shield (2-day) can handle this
-            const shieldBoost = state.activeBoosts.find(b => b.type === 'leaderboard_freeze');
-            if (shieldBoost) {
-              newState = { ...state, lastActiveDate: today };
-            } else {
-              newState = { ...state, streak: 1, lastActiveDate: today };
-            }
+            newState = { ...state, streak: 1, lastActiveDate: today };
           } else {
             newState = { ...state, streakFreezes: state.streakFreezes - 1, lastActiveDate: today };
           }
