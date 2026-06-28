@@ -12,6 +12,7 @@ import Tasks from "./pages/Tasks";
 import FocusMode from "./pages/FocusMode";
 import Achievements from "./pages/Achievements";
 import Shop from "./pages/Shop";
+import Leaderboard from "./pages/Leaderboard";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,7 @@ function ProtectedRoutes() {
           <Route path="/focus" element={<FocusMode />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
