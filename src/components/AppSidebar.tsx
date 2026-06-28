@@ -1,4 +1,4 @@
-import { LayoutDashboard, Calendar, CheckSquare, Target, Trophy, ShoppingBag, Users, Award, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, CheckSquare, Target, Trophy, ShoppingBag, Users, Award, Settings, LogOut, Medal } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
@@ -19,6 +19,7 @@ const navItems = [
   { title: 'Tasks', url: '/tasks', icon: CheckSquare },
   { title: 'Focus Mode', url: '/focus', icon: Target },
   { title: 'Achievements', url: '/achievements', icon: Trophy },
+  { title: 'League', url: '/leaderboard', icon: Medal },
   { title: 'Shop', url: '/shop', icon: ShoppingBag },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
