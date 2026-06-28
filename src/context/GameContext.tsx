@@ -61,20 +61,10 @@ export interface ActiveBoost {
     | 'xp_2x'
     | 'coin_2x'
     | 'xp_3x'
-    | 'leaderboard_freeze'
-    | 'vault'
-    | 'ghost_mode'
-    | 'flame'
-    | 'ice'
-    | 'lightning'
-    | 'villain'
-    | 'all_in'
     | 'xp_daily'
     | 'focus_boost';
   remainingTasks?: number;
   expiresAt?: string;
-  bet?: number;
-  taskId?: string;
 }
 
 interface GameState {
@@ -401,23 +391,10 @@ function gameReducer(state: GameState, action: Action): GameState {
       if (state.lastActiveDate === yesterdayStr) {
         newState = { ...state, streak: state.streak + 1, lastActiveDate: today };
       } else if (state.lastActiveDate !== today) {
-        const hasShield = state.activeBoosts.some(
-          b => b.type === 'leaderboard_freeze' && b.expiresAt && new Date(b.expiresAt).getTime() > Date.now()
-        );
-        // Streak Shield covers 2 days — check if last active was 2 days ago
-        const shieldCovers2Days = state.activeBoosts.some(
-          b => b.type === 'leaderboard_freeze' && b.expiresAt && new Date(b.expiresAt).getTime() > Date.now()
-        );
         if (state.streakFreezes > 0 && state.streak > 0) {
-          // Standard freeze: covers 1 missed day
+          // Standard freeze: covers 1 missed day. Two days missed = streak resets.
           if (state.lastActiveDate === dayBeforeYesterdayStr) {
-            // Two days missed — only shield (2-day) can handle this
-            const shieldBoost = state.activeBoosts.find(b => b.type === 'leaderboard_freeze');
-            if (shieldBoost) {
-              newState = { ...state, lastActiveDate: today };
-            } else {
-              newState = { ...state, streak: 1, lastActiveDate: today };
-            }
+            newState = { ...state, streak: 1, lastActiveDate: today };
           } else {
             newState = { ...state, streakFreezes: state.streakFreezes - 1, lastActiveDate: today };
           }
@@ -758,20 +735,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!task || !user) return;
     const completing = !task.completed;
     if (completing) {
-      let { xp, coins } = computeTaskReward(task, state.activeBoosts);
-
-      // PvP layer removed for v1 — no XP-tax interception.
+      const { xp, coins } = computeTaskReward(task, state.activeBoosts);
 
 
-      // --- All-In resolution ---
-      const allIn = state.activeBoosts.find(
-        b => b.type === 'all_in' && b.taskId === taskId &&
-             (!b.expiresAt || new Date(b.expiresAt).getTime() > Date.now())
-      );
-      if (allIn?.bet) {
-        coins += allIn.bet * 2;
-        dispatch({ type: 'REMOVE_BOOST_TYPE', boostType: 'all_in' });
-      }
 
       dispatch({ type: 'APPLY_TASK_TOGGLE', taskId, completing: true, xpDelta: xp, coinDelta: coins });
       await supabase.from('task_completions').insert({

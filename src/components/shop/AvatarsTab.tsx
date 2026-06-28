@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { useGame, type ActiveBoost } from '@/context/GameContext';
+import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, Lock } from 'lucide-react';
+import { Coins } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -12,8 +12,7 @@ import { toast } from 'sonner';
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
 const cardVar = { hidden: { opacity: 0, y: 15, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1 } };
 
-type AuraType = 'flame' | 'ice' | 'lightning' | 'villain' | 'none';
-type BoostAura = Extract<ActiveBoost['type'], 'flame' | 'ice' | 'lightning' | 'villain'>;
+type AuraType = 'flame' | 'ice' | 'lightning' | 'none';
 
 const RARE_TITLES = ['👁️ Watcher', '🐺 Lone Wolf', '💀 Untouchable', '⚡ Overachiever'];
 
@@ -23,8 +22,6 @@ function AuraPreview({ type, letter }: { type: AuraType | string; letter: string
     flame:     { boxShadow: '0 0 0 3px #f97316, 0 0 12px 4px #f97316aa', animation: 'pulse 1.5s infinite' },
     ice:       { boxShadow: '0 0 0 3px #67e8f9, 0 0 12px 4px #67e8f9aa' },
     lightning: { boxShadow: '0 0 0 3px #fde047, 0 0 12px 6px #fde04799' },
-    villain:   { boxShadow: '0 0 0 3px #ef4444, 0 0 16px 6px #ef444499', filter: 'contrast(1.1)' },
-    ghost:     { filter: 'grayscale(1) opacity(0.5)' },
     none:      { boxShadow: '0 0 0 2px hsl(var(--border))' },
   };
   return (
@@ -39,16 +36,14 @@ function AuraPreview({ type, letter }: { type: AuraType | string; letter: string
 
 interface AvatarItemDef {
   id: string; icon: string; name: string; description: string; price: number;
-  auraKey?: AuraType; requiresRivalry?: boolean;
+  auraKey?: AuraType;
 }
 
 const AVATAR_ITEMS: AvatarItemDef[] = [
-  { id: 'streak_crown',  icon: '👑', name: 'Streak Crown',   description: "Worn by whoever has the longest active streak in the group. Transfers automatically.",         price: 500 },
+  { id: 'streak_crown',  icon: '👑', name: 'Streak Crown',   description: 'Wear a crown on your avatar while your streak is active.',                                     price: 500 },
   { id: 'flame_aura',    icon: '🔥', name: 'Flame Aura',     description: 'Animated fire ring around your avatar. Persistent until replaced.',                            price: 400, auraKey: 'flame' },
   { id: 'ice_aura',      icon: '❄️', name: 'Ice Aura',       description: 'Cool icy glowing ring around your avatar. Persistent until replaced.',                         price: 400, auraKey: 'ice' },
   { id: 'lightning_frame',icon: '⚡',name: 'Lightning Frame', description: 'Electric animated border around your avatar. Persistent until replaced.',                      price: 350, auraKey: 'lightning' },
-  { id: 'ghost_mode',    icon: '👻', name: 'Ghost Mode',     description: 'Your rank shows as ??? to everyone for 48hrs. Disappear from the radar.',                      price: 300 },
-  { id: 'villain_arc',   icon: '😈', name: 'Villain Arc',    description: 'Dark cracked frame with red glow. Unlocks after buying any Rivalry item.',                     price: 450, auraKey: 'villain', requiresRivalry: true },
   { id: 'custom_title',  icon: '🏷️', name: 'Custom Title',   description: 'Set a short title shown under your name everywhere.',                                           price: 250 },
   { id: 'mystery_box',   icon: '🎁', name: 'Mystery Avatar Box', description: 'Random avatar item — could be common or ultra rare.',                                      price: 150 },
 ];
@@ -67,11 +62,12 @@ export function AvatarsTab() {
   const [spinning, setSpinning] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const hasRivalryPurchase = ['task_curse', 'xp_tax', 'rank_steal', 'silence', 'curse_block', 'all_in',
-    'curse', 'xp_tax', 'rank_steal', 'silence', 'curse_block', 'all_in'].some(id => state.purchasedItems.includes(id));
-
-  const activeAura: string = (state as any).activeAura || 'none';
-  const activeTitle: string = (state as any).customTitle || '';
+  const applyAura = async (aura: AuraType) => {
+    dispatch({ type: 'SET_AVATAR_AURA', aura });
+    if (user) {
+      await supabase.from('profiles').update({ active_aura: aura } as any).eq('user_id', user.id);
+    }
+  };
 
   const execute = async (itemId: string) => {
     const def = AVATAR_ITEMS.find(a => a.id === itemId);
@@ -79,59 +75,36 @@ export function AvatarsTab() {
 
     if (state.coins < def.price) { toast.error('Not enough coins!'); return; }
 
-    if (def.requiresRivalry && !hasRivalryPurchase) {
-      toast.error('Unlock requires a Rivalry purchase first!');
-      return;
-    }
-
     setLoading(true);
 
     if (itemId === 'mystery_box') {
-      // Spin animation then reveal
       setSpinning(true);
       setModal('mystery_reveal');
       await new Promise(r => setTimeout(r, 2000));
       setSpinning(false);
-      // Roll random item
-      const pool = ['flame_aura', 'ice_aura', 'lightning_frame', 'ghost_mode', ...RARE_TITLES];
+      const pool = ['flame_aura', 'ice_aura', 'lightning_frame', ...RARE_TITLES];
       const rolled = pool[Math.floor(Math.random() * pool.length)];
       const alreadyOwned = state.purchasedItems.includes(rolled);
       if (alreadyOwned) {
-        dispatch({ type: 'ADD_COINS', amount: -def.price + 50 }); // refund 50
+        dispatch({ type: 'ADD_COINS', amount: -def.price + 50 });
         setRevealItem('refund');
         toast('Already owned — 50 coins refunded 💰');
       } else {
         dispatch({ type: 'ADD_COINS', amount: -def.price });
         setRevealItem(rolled);
         if (RARE_TITLES.includes(rolled)) {
-          // Apply as a custom title (does NOT overwrite the user's real display name)
           dispatch({ type: 'SET_CUSTOM_TITLE', title: rolled });
           if (user) {
             await supabase.from('profiles').update({ custom_title: rolled } as any).eq('user_id', user.id);
           }
         } else {
           dispatch({ type: 'ADD_PURCHASED_ITEM', itemId: rolled });
-          // If it's an aura, apply the aura too
-          const auraMap: Record<string, BoostAura> = {
+          const auraMap: Record<string, AuraType> = {
             flame_aura: 'flame',
             ice_aura: 'ice',
             lightning_frame: 'lightning',
           };
-          if (auraMap[rolled]) {
-            dispatch({ type: 'ADD_TIMED_BOOST', boost: { type: auraMap[rolled] } });
-            dispatch({ type: 'SET_AVATAR_AURA', aura: auraMap[rolled] });
-            if (user) {
-              await supabase.from('profiles').update({ active_aura: auraMap[rolled] } as any).eq('user_id', user.id);
-            }
-          } else if (rolled === 'ghost_mode') {
-            dispatch({
-              type: 'ADD_TIMED_BOOST',
-              boost: {
-                type: 'ghost_mode',
-                expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-              },
-            });
-          }
+          if (auraMap[rolled]) await applyAura(auraMap[rolled]);
         }
         toast.success(`You got: ${rolled}! 🎉`);
       }
@@ -145,44 +118,19 @@ export function AvatarsTab() {
       return;
     }
 
-    if (itemId === 'ghost_mode') {
-      dispatch({ type: 'ADD_COINS', amount: -def.price });
-      dispatch({ type: 'ADD_PURCHASED_ITEM', itemId: 'ghost_mode' });
-      dispatch({
-        type: 'ADD_TIMED_BOOST',
-        boost: {
-          type: 'ghost_mode',
-          expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
-        },
-      });
-      toast.success('👻 Ghost Mode active for 48hrs! Your rank shows as ??? to everyone.');
-      setLoading(false);
-      return;
-    }
-
     if (itemId === 'streak_crown') {
       dispatch({ type: 'ADD_COINS', amount: -def.price });
       dispatch({ type: 'ADD_PURCHASED_ITEM', itemId: 'streak_crown' });
-      toast.success('👑 Streak Crown purchased! It will appear above the player with the longest streak in your group.');
+      toast.success('👑 Streak Crown unlocked! It appears on your avatar while your streak is active.');
       setLoading(false);
       return;
     }
 
     // Aura items
     if (def.auraKey) {
-      const auraKey = def.auraKey as BoostAura;
       dispatch({ type: 'ADD_COINS', amount: -def.price });
       dispatch({ type: 'ADD_PURCHASED_ITEM', itemId });
-      // Swap any existing aura for the new one (ADD_TIMED_BOOST already replaces same-type entries)
-      const auraTypes: BoostAura[] = ['flame', 'ice', 'lightning', 'villain'];
-      auraTypes.forEach(t => {
-        if (t !== auraKey) dispatch({ type: 'REMOVE_BOOST_TYPE', boostType: t });
-      });
-      dispatch({ type: 'ADD_TIMED_BOOST', boost: { type: auraKey } });
-      dispatch({ type: 'SET_AVATAR_AURA', aura: auraKey });
-      if (user) {
-        await supabase.from('profiles').update({ active_aura: auraKey } as any).eq('user_id', user.id);
-      }
+      await applyAura(def.auraKey);
       toast.success(`${def.icon} ${def.name} applied to your avatar!`);
     }
 
@@ -212,7 +160,6 @@ export function AvatarsTab() {
     if (item === 'flame_aura') return '🔥 Flame Aura';
     if (item === 'ice_aura') return '❄️ Ice Aura';
     if (item === 'lightning_frame') return '⚡ Lightning Frame';
-    if (item === 'ghost_mode') return '👻 Ghost Mode';
     return item; // rare title
   };
 
@@ -220,31 +167,17 @@ export function AvatarsTab() {
     <>
       <motion.div variants={container} initial="hidden" animate="show" className="grid sm:grid-cols-2 gap-4">
         {AVATAR_ITEMS.map(ai => {
-          const locked = ai.requiresRivalry && !hasRivalryPurchase;
           const owned = state.purchasedItems.includes(ai.id);
 
           return (
             <motion.div
               key={ai.id}
               variants={cardVar}
-              whileHover={{ scale: locked ? 1 : 1.02 }}
-              className={`glass-card p-5 flex flex-col gap-3 transition-shadow relative ${locked ? 'opacity-60' : 'hover:shadow-lg'}`}
+              whileHover={{ scale: 1.02 }}
+              className="glass-card p-5 flex flex-col gap-3 transition-shadow relative hover:shadow-lg"
             >
-              {locked && (
-                <div className="absolute top-3 right-3 group cursor-default">
-                  <Lock className="h-4 w-4 text-muted-foreground" />
-                  <div className="absolute right-0 top-5 bg-popover border border-border rounded-lg px-3 py-1.5 text-xs w-48 opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-lg pointer-events-none">
-                    Buy any Rivalry item to unlock
-                  </div>
-                </div>
-              )}
-
-              {/* Avatar preview */}
               <div className="flex items-start gap-3">
-                <AuraPreview
-                  type={ai.auraKey || (ai.id === 'ghost_mode' ? 'ghost' : 'none')}
-                  letter="Q"
-                />
+                <AuraPreview type={ai.auraKey || 'none'} letter="Q" />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-display font-bold flex items-center gap-2">
                     {ai.icon} {ai.name}
@@ -262,11 +195,11 @@ export function AvatarsTab() {
                 </div>
                 <Button
                   size="sm"
-                  disabled={locked || loading || state.coins < ai.price}
-                  variant={state.coins < ai.price || locked ? 'outline' : 'default'}
+                  disabled={loading || state.coins < ai.price}
+                  variant={state.coins < ai.price ? 'outline' : 'default'}
                   onClick={() => execute(ai.id)}
                 >
-                  {locked ? <><Lock className="h-3 w-3 mr-1" />Locked</> : <><Coins className="h-3 w-3 mr-1" />{ai.price}</>}
+                  <Coins className="h-3 w-3 mr-1" />{ai.price}
                 </Button>
               </div>
             </motion.div>
@@ -281,7 +214,7 @@ export function AvatarsTab() {
             <DialogTitle className="font-display">🏷️ Set Your Custom Title</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <p className="text-sm text-muted-foreground">This title will appear under your name on your profile and the leaderboard.</p>
+            <p className="text-sm text-muted-foreground">This title will appear under your name on your profile.</p>
             <Input
               placeholder="e.g. Unbothered, On a Mission, Dangerous…"
               maxLength={20}
@@ -328,8 +261,7 @@ export function AvatarsTab() {
                   {revealItem === 'refund' ? '💰' :
                    revealItem === 'flame_aura' ? '🔥' :
                    revealItem === 'ice_aura' ? '❄️' :
-                   revealItem === 'lightning_frame' ? '⚡' :
-                   revealItem === 'ghost_mode' ? '👻' : '✨'}
+                   revealItem === 'lightning_frame' ? '⚡' : '✨'}
                 </motion.div>
               )}
             </AnimatePresence>

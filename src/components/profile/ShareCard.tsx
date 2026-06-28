@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Share2, Copy, Link2, Download, Flame, CheckSquare, Brain, Trophy } from 'lucide-react';
+import { Share2, Copy, Download, Flame, CheckSquare, Brain, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
@@ -45,11 +45,6 @@ export function ShareCard() {
     catch { toast.error('Could not copy'); }
   };
 
-  const copyLink = async () => {
-    const url = user?.id ? `${window.location.origin}/profile/${user.id}` : window.location.origin;
-    try { await navigator.clipboard.writeText(url); toast.success('Profile link copied!'); }
-    catch { toast.error('Could not copy'); }
-  };
 
   const downloadCard = () => {
     const blob = new Blob([buildShareSvg(stats)], { type: 'image/svg+xml' });
@@ -94,9 +89,6 @@ export function ShareCard() {
       <div className="flex flex-wrap gap-2">
         <Button size="sm" variant="outline" className="gap-1.5 flex-1" onClick={copyText}>
           <Copy className="h-3.5 w-3.5" /> Copy caption
-        </Button>
-        <Button size="sm" variant="outline" className="gap-1.5 flex-1" onClick={copyLink}>
-          <Link2 className="h-3.5 w-3.5" /> Copy link
         </Button>
         <Button size="sm" className="gap-1.5 flex-1" onClick={downloadCard}>
           <Download className="h-3.5 w-3.5" /> Download card

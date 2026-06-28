@@ -106,8 +106,9 @@ export default function Shop() {
     };
   };
 
-  // FIX: use isBoostActive helper so time-based boosts (xp_daily, ghost_mode, etc.) appear
+  // Use isBoostActive so time-based boosts (xp_daily, focus_boost) appear correctly.
   const activeBoosts = state.activeBoosts.filter(isBoostActive);
+
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -143,12 +144,10 @@ export default function Shop() {
                 const icons: Record<string, string> = {
                   xp_3x: '🔮', xp_2x: '⚡', coin_2x: '💎',
                   xp_daily: '🌟', focus_boost: '🧠',
-                  leaderboard_freeze: '🧊', vault: '🔒', ghost_mode: '👻',
                 };
                 const labels: Record<string, string> = {
                   xp_3x: '3× XP', xp_2x: '2× XP', coin_2x: '2× Coins',
                   xp_daily: '+50% XP Today', focus_boost: '2× Focus XP',
-                  leaderboard_freeze: 'Rank Frozen', vault: 'Vault', ghost_mode: 'Ghost Mode',
                 };
                 const icon = icons[boost.type] || '✨';
                 const label = labels[boost.type] || boost.type;
