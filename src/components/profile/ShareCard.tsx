@@ -1,10 +1,13 @@
 import { useMemo } from 'react';
-import { Share2, Copy, Link2, Download, Flame, CheckSquare, Brain, Trophy } from 'lucide-react';
+import { Share2, Copy, Download, Flame, CheckSquare, Brain, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { getRank } from '@/lib/progression';
 import { totalReached } from '@/lib/milestones';
+import { buildShareText, buildShareSvg, type ShareStats } from '@/lib/shareCard';
+import { RankBadge } from '@/components/progression/RankBadge';
+import { Button } from '@/components/ui/button';
 import { buildShareText, buildShareSvg, type ShareStats } from '@/lib/shareCard';
 import { RankBadge } from '@/components/progression/RankBadge';
 import { Button } from '@/components/ui/button';
