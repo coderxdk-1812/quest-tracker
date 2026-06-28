@@ -45,11 +45,6 @@ export function ShareCard() {
     catch { toast.error('Could not copy'); }
   };
 
-  const copyLink = async () => {
-    const url = user?.id ? `${window.location.origin}/profile/${user.id}` : window.location.origin;
-    try { await navigator.clipboard.writeText(url); toast.success('Profile link copied!'); }
-    catch { toast.error('Could not copy'); }
-  };
 
   const downloadCard = () => {
     const blob = new Blob([buildShareSvg(stats)], { type: 'image/svg+xml' });
