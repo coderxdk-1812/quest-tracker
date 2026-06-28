@@ -735,20 +735,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!task || !user) return;
     const completing = !task.completed;
     if (completing) {
-      let { xp, coins } = computeTaskReward(task, state.activeBoosts);
-
-      // PvP layer removed for v1 — no XP-tax interception.
+      const { xp, coins } = computeTaskReward(task, state.activeBoosts);
 
 
-      // --- All-In resolution ---
-      const allIn = state.activeBoosts.find(
-        b => b.type === 'all_in' && b.taskId === taskId &&
-             (!b.expiresAt || new Date(b.expiresAt).getTime() > Date.now())
-      );
-      if (allIn?.bet) {
-        coins += allIn.bet * 2;
-        dispatch({ type: 'REMOVE_BOOST_TYPE', boostType: 'all_in' });
-      }
 
       dispatch({ type: 'APPLY_TASK_TOGGLE', taskId, completing: true, xpDelta: xp, coinDelta: coins });
       await supabase.from('task_completions').insert({
