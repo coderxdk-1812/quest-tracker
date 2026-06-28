@@ -61,20 +61,10 @@ export interface ActiveBoost {
     | 'xp_2x'
     | 'coin_2x'
     | 'xp_3x'
-    | 'leaderboard_freeze'
-    | 'vault'
-    | 'ghost_mode'
-    | 'flame'
-    | 'ice'
-    | 'lightning'
-    | 'villain'
-    | 'all_in'
     | 'xp_daily'
     | 'focus_boost';
   remainingTasks?: number;
   expiresAt?: string;
-  bet?: number;
-  taskId?: string;
 }
 
 interface GameState {
