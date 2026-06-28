@@ -106,8 +106,9 @@ export default function Shop() {
     };
   };
 
-  // FIX: use isBoostActive helper so time-based boosts (xp_daily, ghost_mode, etc.) appear
+  // Use isBoostActive so time-based boosts (xp_daily, focus_boost) appear correctly.
   const activeBoosts = state.activeBoosts.filter(isBoostActive);
+
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
