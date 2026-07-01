@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import { rollSurpriseReward } from '@/lib/motivation';
 
 // Types
 export type Priority = 'easy' | 'medium' | 'hard';
@@ -739,19 +741,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const xpProgress = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
   const xpToNextLevel = XP_PER_LEVEL - xpInCurrentLevel;
 
-  const toggleTask = useCallback(async (taskId: string) => {
+const toggleTask = useCallback(async (taskId: string) => {
     const task = state.tasks.find(t => t.id === taskId);
     if (!task || !user) return;
     const completing = !task.completed;
     if (completing) {
       const { xp, coins } = computeTaskReward(task, state.activeBoosts);
-
-
-
       dispatch({ type: 'APPLY_TASK_TOGGLE', taskId, completing: true, xpDelta: xp, coinDelta: coins });
       await supabase.from('task_completions').insert({
         task_id: taskId, user_id: user.id, xp_granted: xp, coins_granted: coins,
       });
+
+      // ── surprise reward (Batch 3) ──
+      const surprise = rollSurpriseReward();
+      if (surprise) {
+        if (surprise.coins > 0) dispatch({ type: 'ADD_COINS', amount: surprise.coins });
+        if (surprise.xp > 0) dispatch({ type: 'ADD_XP', amount: surprise.xp });
+        toast.success(`${surprise.emoji} ${surprise.label}`);
+      }
     } else {
       const { data: completions } = await supabase
         .from('task_completions')
