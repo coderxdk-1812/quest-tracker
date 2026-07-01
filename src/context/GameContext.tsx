@@ -55,6 +55,8 @@ export interface Achievement {
   unlockedAt?: string;
 }
 
+export type ShopTier = 'consumable' | 'powerup' | 'premium';
+
 export interface ShopItem {
   id: string;
   name: string;
@@ -62,8 +64,11 @@ export interface ShopItem {
   icon: string;
   price: number;
   category: 'powerup' | 'theme' | 'badge';
+  /** Price ladder tier used to group items in the shop UI. */
+  tier?: ShopTier;
   oneTime?: boolean;
 }
+
 
 export interface ActiveBoost {
   type:
@@ -168,24 +173,31 @@ const ACHIEVEMENTS: Achievement[] = [
 ];
 
 export const SHOP_ITEMS: ShopItem[] = [
-  // --- Power-Ups ---
-  { id: 'xp_2x_mini', name: 'XP Spark', description: 'Double XP for the next task', icon: '✨', price: 40, category: 'powerup' },
-  { id: 'xp_2x', name: '2x XP Boost', description: 'Double XP for the next 5 tasks', icon: '⚡', price: 150, category: 'powerup' },
-  { id: 'xp_mega', name: 'XP Mega Boost', description: 'Triple XP for the next 10 tasks!', icon: '🔮', price: 400, category: 'powerup' },
-  { id: 'xp_daily', name: 'Daily XP Surge', description: '+50% XP on every task for the next 24 hours', icon: '🌟', price: 300, category: 'powerup' },
-  { id: 'coin_2x_mini', name: 'Coin Spark', description: 'Double coins for the next task', icon: '🪙', price: 40, category: 'powerup' },
-  { id: 'coin_2x', name: '2x Coin Boost', description: 'Double coins for the next 5 tasks', icon: '💎', price: 150, category: 'powerup' },
-  { id: 'streak_freeze', name: 'Streak Freeze', description: 'Protect your streak for 1 missed day', icon: '🛡️', price: 100, category: 'powerup' },
-  { id: 'streak_shield', name: 'Streak Shield', description: 'Heavy protection — covers 2 consecutive missed days', icon: '🏰', price: 220, category: 'powerup' },
-  { id: 'lucky_spin', name: 'Lucky Jackpot', description: 'Spin for 50–300 bonus coins — luck matters!', icon: '🎰', price: 120, category: 'powerup' },
-  { id: 'focus_boost', name: 'Focus Boost', description: 'Your next focus session grants 2× XP on completion', icon: '🧠', price: 180, category: 'powerup' },
+  // --- Consumables (cheap, one-shot) ---
+  { id: 'xp_2x_mini', name: 'XP Spark', description: 'Double XP for the next task', icon: '✨', price: 40, category: 'powerup', tier: 'consumable' },
+  { id: 'coin_2x_mini', name: 'Coin Spark', description: 'Double coins for the next task', icon: '🪙', price: 40, category: 'powerup', tier: 'consumable' },
+  { id: 'streak_freeze', name: 'Streak Freeze', description: 'Protect your streak for 1 missed day', icon: '🛡️', price: 100, category: 'powerup', tier: 'consumable' },
+  { id: 'mystery_box', name: 'Mystery Box', description: 'A random reward — coins, a boost, or a rare jackpot!', icon: '🎁', price: 120, category: 'powerup', tier: 'consumable' },
+  { id: 'lucky_spin', name: 'Lucky Jackpot', description: 'Spin for 50–300 bonus coins — luck matters!', icon: '🎰', price: 120, category: 'powerup', tier: 'consumable' },
+
+  // --- Power-Ups (mid-tier, meaningful boost) ---
+  { id: 'xp_2x', name: '2x XP Boost', description: 'Double XP for the next 5 tasks', icon: '⚡', price: 150, category: 'powerup', tier: 'powerup' },
+  { id: 'coin_2x', name: '2x Coin Boost', description: 'Double coins for the next 5 tasks', icon: '💎', price: 150, category: 'powerup', tier: 'powerup' },
+  { id: 'focus_boost', name: 'Focus Boost', description: 'Your next focus session grants 2× XP on completion', icon: '🧠', price: 180, category: 'powerup', tier: 'powerup' },
+  { id: 'streak_shield', name: 'Streak Shield', description: 'Heavy protection — covers 2 consecutive missed days', icon: '🏰', price: 220, category: 'powerup', tier: 'powerup' },
+  { id: 'xp_daily', name: 'Daily XP Surge', description: '+50% XP on every task for the next 24 hours', icon: '🌟', price: 300, category: 'powerup', tier: 'powerup' },
+
+  // --- Premium (aspirational, save-toward) ---
+  { id: 'xp_mega', name: 'XP Mega Boost', description: 'Triple XP for the next 10 tasks!', icon: '🔮', price: 400, category: 'powerup', tier: 'premium' },
+
   // --- Themes ---
   { id: 'theme_midnight', name: 'Midnight', description: 'Deep dark purple with light mode variant', icon: '🌙', price: 200, category: 'theme', oneTime: true },
   { id: 'theme_sakura', name: 'Sakura', description: 'Cherry blossom pink — light and dark modes', icon: '🌸', price: 200, category: 'theme', oneTime: true },
   { id: 'theme_ocean', name: 'Ocean', description: 'Deep-sea blue — light and dark modes', icon: '🌊', price: 200, category: 'theme', oneTime: true },
-  { id: 'theme_neon', name: 'Neon Glow', description: 'Cyberpunk electric — light and dark modes', icon: '💜', price: 350, category: 'theme', oneTime: true },
   { id: 'theme_sunset', name: 'Sunset', description: 'Warm orange coral — light and dark modes', icon: '🌅', price: 250, category: 'theme', oneTime: true },
+  { id: 'theme_neon', name: 'Neon Glow', description: 'Cyberpunk electric — light and dark modes', icon: '💜', price: 350, category: 'theme', oneTime: true },
 ];
+
 
 export interface EarnableBadge {
   id: string;
