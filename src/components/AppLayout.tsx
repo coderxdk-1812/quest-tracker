@@ -7,10 +7,12 @@ import { useGame } from '@/context/GameContext';
 import { NotificationScheduler } from '@/hooks/useNotificationScheduler';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { AuroraBackground } from '@/components/AuroraBackground';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state, dispatch } = useGame();
   const location = useLocation();
+  useScrollReveal();
 
   return (
     <SidebarProvider>
