@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_goals: {
+        Row: {
+          archived: boolean
+          created_at: string
+          id: string
+          subject: string | null
+          target_date: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          subject?: string | null
+          target_date?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          created_at?: string
+          id?: string
+          subject?: string | null
+          target_date?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_quests: {
         Row: {
           baselines: Json
@@ -110,6 +140,33 @@ export type Database = {
           updated_at?: string
           user_id?: string
           xp?: number
+        }
+        Relationships: []
+      }
+      league_members: {
+        Row: {
+          bracket: number
+          created_at: string
+          id: string
+          tier: number
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          bracket?: number
+          created_at?: string
+          id?: string
+          tier?: number
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          bracket?: number
+          created_at?: string
+          id?: string
+          tier?: number
+          user_id?: string
+          week_start?: string
         }
         Relationships: []
       }
@@ -252,6 +309,7 @@ export type Database = {
           priority: string
           subject: string | null
           subject_color: string | null
+          subtasks: Json
           tags: string[]
           title: string
           updated_at: string
@@ -267,6 +325,7 @@ export type Database = {
           priority?: string
           subject?: string | null
           subject_color?: string | null
+          subtasks?: Json
           tags?: string[]
           title: string
           updated_at?: string
@@ -282,6 +341,7 @@ export type Database = {
           priority?: string
           subject?: string | null
           subject_color?: string | null
+          subtasks?: Json
           tags?: string[]
           title?: string
           updated_at?: string
@@ -340,12 +400,69 @@ export type Database = {
         }
         Relationships: []
       }
+      topic_confidence: {
+        Row: {
+          id: string
+          level: string
+          subject: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          level?: string
+          subject: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          level?: string
+          subject?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      lq_join_league: {
+        Args: never
+        Returns: {
+          bracket: number
+          created_at: string
+          id: string
+          tier: number
+          user_id: string
+          week_start: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "league_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lq_standings: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          display_name: string
+          is_me: boolean
+          tier: number
+          user_id: string
+          username: string
+          weekly_xp: number
+        }[]
+      }
+      lq_week_start: { Args: { ts?: string }; Returns: string }
+      lq_weekly_xp: { Args: { uid: string; wk: string }; Returns: number }
     }
     Enums: {
       [_ in never]: never
