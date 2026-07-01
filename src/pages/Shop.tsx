@@ -312,62 +312,135 @@ export default function Shop() {
         </motion.div>
       )}
 
-      {(activeCategory === 'powerup' || activeCategory === 'theme') && (
-        <motion.div key={activeCategory} variants={container} initial="hidden" animate="show" className="grid sm:grid-cols-2 gap-4">
-          {activeCategory === 'theme' && (() => {
-            const isDefaultActive = state.activeTheme === 'default';
-            return (
-              <motion.div
-                key="theme_default" variants={item} whileHover={{ scale: 1.02 }}
-                className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow ${isDefaultActive ? 'ring-2 ring-primary' : 'ring-1 ring-primary/20'}`}
-              >
-                {isDefaultActive && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">✨</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-bold">Default</h3>
-                    <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
+      {(activeCategory === 'powerup' || activeCategory === 'theme') && (() => {
+        const renderCard = (shopItem: ShopItem) => {
+          const btnState = getButtonState(shopItem);
+          const owned = shopItem.oneTime && isPurchased(shopItem.id);
+          const themeActive = activeCategory === 'theme' && owned && isEquippedTheme(shopItem.id);
+          const isMystery = shopItem.id === 'mystery_box';
+          return (
+            <motion.div key={shopItem.id} variants={item} whileHover={{ scale: 1.02 }}
+              className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow ${themeActive ? 'ring-2 ring-primary' : owned ? 'ring-1 ring-primary/20' : isMystery ? 'ring-1 ring-primary/40 bg-primary/5' : 'hover:shadow-lg'}`}>
+              {owned && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
+              <div className="flex items-start gap-3">
+                <span className="text-3xl">{shopItem.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-display font-bold">{shopItem.name}</h3>
+                  <p className="text-sm text-muted-foreground">{shopItem.description}</p>
+                </div>
+              </div>
+              <div className="mt-auto flex items-center justify-between">
+                {!owned && <div className="flex items-center gap-1 text-coin font-bold text-sm"><Coins className="h-4 w-4" />{shopItem.price}</div>}
+                {owned && <span className="text-xs text-primary font-medium">{themeActive ? 'Equipped' : 'Owned'}</span>}
+                <Button size="sm" variant={btnState.variant} disabled={btnState.disabled} onClick={() => handlePurchase(shopItem)} className="ml-auto">
+                  {!owned && <Coins className="h-3 w-3 mr-1" />}
+                  {btnState.label}
+                </Button>
+              </div>
+            </motion.div>
+          );
+        };
+
+        if (activeCategory === 'theme') {
+          const isDefaultActive = state.activeTheme === 'default';
+          return (
+            <motion.div key="theme" variants={container} initial="hidden" animate="show" className="space-y-4">
+              <p className="text-sm text-muted-foreground">Aspirational cosmetics — save up and treat yourself.</p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <motion.div
+                  key="theme_default" variants={item} whileHover={{ scale: 1.02 }}
+                  className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow ${isDefaultActive ? 'ring-2 ring-primary' : 'ring-1 ring-primary/20'}`}
+                >
+                  {isDefaultActive && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl">✨</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display font-bold">Default</h3>
+                      <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
+                    </div>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between">
+                    <span className="text-xs text-primary font-medium">Free</span>
+                    <Button size="sm" variant={isDefaultActive ? 'secondary' : 'outline'} disabled={isDefaultActive}
+                      onClick={() => { dispatch({ type: 'SET_THEME', themeId: 'default' }); toast.success('Default theme activated! ✨'); }}
+                      className="ml-auto">
+                      {isDefaultActive ? 'Active' : 'Equip'}
+                    </Button>
+                  </div>
+                </motion.div>
+                {filteredItems.map(renderCard)}
+              </div>
+            </motion.div>
+          );
+        }
+
+        // Power-Ups: grouped by price ladder tier
+        const tierOrder: ShopTier[] = ['consumable', 'powerup', 'premium'];
+        return (
+          <motion.div key="powerup" variants={container} initial="hidden" animate="show" className="space-y-6">
+            {tierOrder.map(tier => {
+              const items = filteredItems.filter(i => (i.tier ?? 'powerup') === tier);
+              if (items.length === 0) return null;
+              const meta = TIER_META[tier];
+              const minPrice = Math.min(...items.map(i => i.price));
+              const maxPrice = Math.max(...items.map(i => i.price));
+              return (
+                <div key={tier} className="space-y-3">
+                  <div className="flex items-baseline justify-between">
+                    <div>
+                      <h2 className="font-display font-bold text-lg">{meta.label}</h2>
+                      <p className="text-xs text-muted-foreground">{meta.blurb}</p>
+                    </div>
+                    <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                      {minPrice === maxPrice ? `${minPrice}🪙` : `${minPrice}–${maxPrice}🪙`}
+                    </span>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    {items.map(renderCard)}
                   </div>
                 </div>
-                <div className="mt-auto flex items-center justify-between">
-                  <span className="text-xs text-primary font-medium">Free</span>
-                  <Button size="sm" variant={isDefaultActive ? 'secondary' : 'outline'} disabled={isDefaultActive}
-                    onClick={() => { dispatch({ type: 'SET_THEME', themeId: 'default' }); toast.success('Default theme activated! ✨'); }}
-                    className="ml-auto">
-                    {isDefaultActive ? 'Active' : 'Equip'}
-                  </Button>
-                </div>
-              </motion.div>
-            );
-          })()}
-          {filteredItems.map(shopItem => {
-            const btnState = getButtonState(shopItem);
-            const owned = shopItem.oneTime && isPurchased(shopItem.id);
-            const themeActive = activeCategory === 'theme' && owned && isEquippedTheme(shopItem.id);
-            return (
-              <motion.div key={shopItem.id} variants={item} whileHover={{ scale: 1.02 }}
-                className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow ${themeActive ? 'ring-2 ring-primary' : owned ? 'ring-1 ring-primary/20' : 'hover:shadow-lg'}`}>
-                {owned && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
-                <div className="flex items-start gap-3">
-                  <span className="text-3xl">{shopItem.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-display font-bold">{shopItem.name}</h3>
-                    <p className="text-sm text-muted-foreground">{shopItem.description}</p>
-                  </div>
-                </div>
-                <div className="mt-auto flex items-center justify-between">
-                  {!owned && <div className="flex items-center gap-1 text-coin font-bold text-sm"><Coins className="h-4 w-4" />{shopItem.price}</div>}
-                  {owned && <span className="text-xs text-primary font-medium">{themeActive ? 'Equipped' : 'Owned'}</span>}
-                  <Button size="sm" variant={btnState.variant} disabled={btnState.disabled} onClick={() => handlePurchase(shopItem)} className="ml-auto">
-                    {!owned && <Coins className="h-3 w-3 mr-1" />}
-                    {btnState.label}
-                  </Button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      )}
+              );
+            })}
+          </motion.div>
+        );
+      })()}
+
+      {/* Mystery Box reveal dialog */}
+      <Dialog open={mysterySpinning || mysteryReward !== null} onOpenChange={(open) => { if (!open) { setMysteryReward(null); setMysterySpinning(false); } }}>
+        <DialogContent className="text-center">
+          <DialogHeader>
+            <DialogTitle className="font-display text-center flex items-center justify-center gap-2">
+              <Gift className="h-5 w-5 text-primary" /> Mystery Box
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-8 flex flex-col items-center gap-4">
+            <AnimatePresence mode="wait">
+              {mysterySpinning ? (
+                <motion.div key="spin" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.4, ease: 'linear' }} className="text-6xl">
+                  🎁
+                </motion.div>
+              ) : mysteryReward ? (
+                <motion.div key="reveal" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 15 }} className="text-6xl">
+                  {mysteryReward.icon}
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+            {!mysterySpinning && mysteryReward && (
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-display font-bold text-xl">
+                {mysteryReward.kind === 'jackpot' ? '🎉 JACKPOT!' : 'You got:'}
+                <span className="block mt-1 text-base font-medium">{mysteryReward.label}</span>
+              </motion.p>
+            )}
+            {mysterySpinning && <p className="text-muted-foreground">Opening your box…</p>}
+          </div>
+          {!mysterySpinning && mysteryReward && (
+            <Button onClick={() => { setMysteryReward(null); }}>
+              Nice! 🎉
+            </Button>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
