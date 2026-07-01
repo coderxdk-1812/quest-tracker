@@ -77,6 +77,9 @@ function isBoostActive(boost: ActiveBoost): boolean {
 export default function Shop() {
   const { state, dispatch } = useGame();
   const [activeCategory, setActiveCategory] = useState<Category>('powerup');
+  const [mysteryReward, setMysteryReward] = useState<MysteryReward | null>(null);
+  const [mysterySpinning, setMysterySpinning] = useState(false);
+
 
   const filteredItems = SHOP_ITEMS.filter(i => i.category === activeCategory);
 
@@ -102,6 +105,31 @@ export default function Shop() {
       toast.error('Not enough coins!', { description: 'Complete more tasks to earn coins.' });
       return;
     }
+
+    // Mystery Box — custom reveal flow
+    if (shopItem.id === 'mystery_box') {
+      dispatch({ type: 'ADD_COINS', amount: -shopItem.price });
+      setMysteryReward(null);
+      setMysterySpinning(true);
+      setTimeout(() => {
+        const reward = rollMysteryBox();
+        setMysterySpinning(false);
+        setMysteryReward(reward);
+        if (reward.kind === 'coins' || reward.kind === 'jackpot') {
+          dispatch({ type: 'ADD_COINS', amount: reward.amount });
+        } else {
+          // Apply as a timed/consumable boost via existing PURCHASE_ITEM plumbing, minus cost
+          // We refund the shop item's price so only the box price is spent.
+          const boostItem = SHOP_ITEMS.find(i => i.id === reward.boostId);
+          if (boostItem) {
+            dispatch({ type: 'ADD_COINS', amount: boostItem.price });
+            dispatch({ type: 'PURCHASE_ITEM', item: boostItem });
+          }
+        }
+      }, 1600);
+      return;
+    }
+
     dispatch({ type: 'PURCHASE_ITEM', item: shopItem });
 
     if (shopItem.id === 'lucky_spin') {
@@ -124,6 +152,7 @@ export default function Shop() {
       toast.success(`${shopItem.name} unlocked! ${shopItem.icon}`);
     }
   };
+
 
   const getButtonState = (shopItem: ShopItem) => {
     if (shopItem.oneTime && isPurchased(shopItem.id)) {
