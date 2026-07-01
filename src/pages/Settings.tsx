@@ -35,7 +35,7 @@ export default function Settings() {
   const [showTasksCompleted, setShowTasksCompleted] = useState(true);
   const [notifyStreaks, setNotifyStreaks]        = useState(true);
   const [notifyFriends, setNotifyFriends]       = useState(true);
-  const [notifyRivalry, setNotifyRivalry]       = useState(true);
+
   const [saving, setSaving]                     = useState(false);
 
   // Delete account dialog
@@ -230,8 +230,8 @@ export default function Settings() {
           {[
             { label: 'Streak reminders', desc: 'Daily reminder to keep your streak alive', value: notifyStreaks,  set: setNotifyStreaks },
             { label: 'Friend activity',  desc: 'When friends send requests or level up',   value: notifyFriends, set: setNotifyFriends },
-            { label: 'Rivalry alerts',   desc: 'Curses, duels, and wager updates',         value: notifyRivalry, set: setNotifyRivalry },
           ].map(pref => (
+
             <div key={pref.label} className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{pref.label}</p>

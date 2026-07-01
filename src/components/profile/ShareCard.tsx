@@ -46,15 +46,42 @@ export function ShareCard() {
   };
 
 
-  const downloadCard = () => {
-    const blob = new Blob([buildShareSvg(stats)], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `level-up-quest-${displayName.toLowerCase().replace(/\s+/g, '-')}.svg`;
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
-    toast.success('Card downloaded!');
+  const downloadCard = async () => {
+    try {
+      const svg = buildShareSvg(stats);
+      const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to render card'));
+        img.src = url;
+      });
+      const scale = 2; // Retina-quality
+      const canvas = document.createElement('canvas');
+      canvas.width = 600 * scale;
+      canvas.height = 315 * scale;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas not supported');
+      ctx.scale(scale, scale);
+      ctx.drawImage(img, 0, 0, 600, 315);
+      URL.revokeObjectURL(url);
+      const pngBlob: Blob = await new Promise((resolve, reject) =>
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('PNG encoding failed')), 'image/png')
+      );
+      const pngUrl = URL.createObjectURL(pngBlob);
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = `level-up-quest-${displayName.toLowerCase().replace(/\s+/g, '-')}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(pngUrl);
+      toast.success('Card downloaded!');
+    } catch (err) {
+      toast.error('Could not download card');
+    }
   };
+
 
   const accent = `hsl(${rank.hsl})`;
 
