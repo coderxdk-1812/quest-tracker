@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useGame, SHOP_ITEMS, EARNABLE_BADGES, type ShopItem, type ThemeId, type ActiveBoost } from '@/context/GameContext';
+import { useGame, SHOP_ITEMS, EARNABLE_BADGES, type ShopItem, type ShopTier, type ThemeId, type ActiveBoost } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Sparkles, Clock } from 'lucide-react';
+import { Coins, ShoppingBag, Zap, Palette, Award, Check, ShieldCheck, Lock, Sparkles, Clock, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { AvatarsTab } from '@/components/shop/AvatarsTab';
 
@@ -14,6 +15,40 @@ const CATEGORIES = [
 ];
 
 type Category = typeof CATEGORIES[number]['id'];
+
+const TIER_META: Record<ShopTier, { label: string; blurb: string }> = {
+  consumable: { label: 'Consumables',    blurb: 'Cheap, one-shot helpers.' },
+  powerup:    { label: 'Power-Ups',      blurb: 'Meaningful boosts for a study session.' },
+  premium:    { label: 'Premium',        blurb: 'Save toward these — big impact.' },
+};
+
+const MYSTERY_PRICE = 120;
+type MysteryReward =
+  | { kind: 'coins'; amount: number; label: string; icon: string }
+  | { kind: 'boost'; boostId: string; label: string; icon: string }
+  | { kind: 'jackpot'; amount: number; label: string; icon: string };
+
+function rollMysteryBox(): MysteryReward {
+  const roll = Math.random();
+  // 70% coins, 25% boost, 5% jackpot
+  if (roll < 0.70) {
+    // Coin payout: 40–200 (median ~110, slightly around cost)
+    const amount = Math.floor(Math.random() * 161) + 40;
+    return { kind: 'coins', amount, label: `${amount} coins`, icon: '🪙' };
+  }
+  if (roll < 0.95) {
+    const pool = [
+      { id: 'xp_2x_mini',   label: '2× XP · next task',       icon: '✨' },
+      { id: 'coin_2x_mini', label: '2× Coins · next task',    icon: '🪙' },
+      { id: 'focus_boost',  label: '2× Focus XP · next session', icon: '🧠' },
+      { id: 'xp_daily',     label: '+50% XP for 24 hours',    icon: '🌟' },
+    ];
+    const p = pool[Math.floor(Math.random() * pool.length)];
+    return { kind: 'boost', boostId: p.id, label: p.label, icon: p.icon };
+  }
+  return { kind: 'jackpot', amount: 500, label: 'JACKPOT · 500 coins!', icon: '💰' };
+}
+
 
 const container = {
   hidden: { opacity: 0 },
