@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { rollSurpriseReward } from '@/lib/motivation';
+import { computeNextOccurrenceDeadline, isRecurrenceDue, type TaskRecurrence } from '@/lib/recurrence';
 
 // Types
 export type Priority = 'easy' | 'medium' | 'hard';
@@ -27,6 +28,8 @@ export interface Task {
   description?: string;
   tags?: string[];
   subtasks?: Subtask[];
+  /** If set, this occurrence is the active head of a recurring chain — see src/lib/recurrence.ts. */
+  recurrence?: TaskRecurrence;
 }
 
 export interface TimetableEntry {
@@ -131,7 +134,20 @@ type Action =
   | { type: 'SET_DARK_MODE'; enabled: boolean }
   | { type: 'ADD_AI_TOKENS'; amount: number }
   | { type: 'SET_SILENCED'; silenced: boolean }
+  | { type: 'PROCESS_DUE_RECURRENCES' }
   | { type: 'LOAD_STATE'; state: Partial<GameState> };
+
+/** Build the next occurrence of a completed/expired recurring task (fresh id, undone subtasks). */
+function spawnNextOccurrence(task: Task): Task {
+  return {
+    ...task,
+    id: crypto.randomUUID(),
+    completed: false,
+    deadline: computeNextOccurrenceDeadline(task.deadline, task.recurrence!),
+    createdAt: new Date().toISOString(),
+    subtasks: (task.subtasks || []).map(s => ({ ...s, done: false })),
+  };
+}
 
 const XP_PER_LEVEL = 100;
 const XP_REWARDS: Record<Priority, number> = { easy: 10, medium: 25, hard: 50 };
@@ -343,9 +359,16 @@ function gameReducer(state: GameState, action: Action): GameState {
     case 'APPLY_TASK_TOGGLE': {
       const task = state.tasks.find(t => t.id === action.taskId);
       if (!task) return state;
-      const newTasks = state.tasks.map(t =>
-        t.id === action.taskId ? { ...t, completed: action.completing } : t
+      let newTasks = state.tasks.map(t =>
+        t.id === action.taskId
+          // Completing a recurring task closes out this occurrence — the fresh
+          // one spawned below carries the recurrence forward instead.
+          ? { ...t, completed: action.completing, recurrence: action.completing ? undefined : t.recurrence }
+          : t
       );
+      if (action.completing && task.recurrence) {
+        newTasks = [...newTasks, spawnNextOccurrence(task)];
+      }
       const newXp = Math.max(0, state.xp + action.xpDelta);
       const newLevel = Math.max(1, Math.floor(newXp / XP_PER_LEVEL) + 1);
       const newCoins = state.coins + action.coinDelta;
@@ -545,6 +568,20 @@ function gameReducer(state: GameState, action: Action): GameState {
       newState = { ...state, isSilenced: action.silenced };
       break;
 
+    case 'PROCESS_DUE_RECURRENCES': {
+      const now = new Date();
+      const spawned: Task[] = [];
+      const updated = state.tasks.map(t => {
+        if (!isRecurrenceDue(t, now)) return t;
+        spawned.push(spawnNextOccurrence(t));
+        // This instance is now a terminal, plain overdue task — it already reads
+        // correctly via the app's existing overdue styling, nothing is hidden.
+        return { ...t, recurrence: undefined };
+      });
+      newState = spawned.length > 0 ? { ...state, tasks: [...updated, ...spawned] } : state;
+      break;
+    }
+
     default:
       return state;
   }
@@ -618,6 +655,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           description: (t as any).description || undefined,
           tags: ((t as any).tags as string[] | null) || [],
           subtasks: (((t as any).subtasks as Subtask[] | null)) || [],
+          recurrence: ((t as any).recurrence as TaskRecurrence | null) || undefined,
         }));
       }
 
@@ -648,6 +686,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       dispatch({ type: 'LOAD_STATE', state: loadedState });
       setTimeout(() => dispatch({ type: 'CHECK_STREAK' }), 100);
+      setTimeout(() => dispatch({ type: 'PROCESS_DUE_RECURRENCES' }), 100);
     };
 
     loadFromDb();
@@ -697,6 +736,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           description: t.description || null,
           tags: t.tags || [],
           subtasks: t.subtasks || [],
+          recurrence: t.recurrence || null,
         }));
         await supabase.from('tasks').upsert(taskRows as any, { onConflict: 'id' });
       }

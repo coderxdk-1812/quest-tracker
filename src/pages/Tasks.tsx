@@ -3,8 +3,9 @@ import { useGame, type Task, type Priority, type Subtask } from '@/context/GameC
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Trash2, CheckCircle2, Circle, CalendarIcon, Pencil, Search,
-  ChevronDown, ChevronRight, ListChecks,
+  ChevronDown, ChevronRight, ListChecks, Repeat,
 } from 'lucide-react';
+import type { RecurrenceType, TaskRecurrence } from '@/lib/recurrence';
 import { QuestBreakdown } from '@/components/tasks/QuestBreakdown';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,15 @@ function formatDeadline(deadline: string) {
   return format(new Date(deadline), "EEE d MMM, h:mm a");
 }
 
+const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+function recurrenceLabel(r: TaskRecurrence): string {
+  if (r.type === 'daily') return 'Daily';
+  if (r.type === 'weekly') return 'Weekly';
+  const days = r.days ?? [];
+  return days.length > 0 ? days.map(i => DAY_LABELS[i]).join(', ') : 'Weekly';
+}
+
 interface FormState {
   title: string;
   description: string;
@@ -44,12 +54,22 @@ interface FormState {
   deadlineDate: Date | undefined;
   deadlineTime: string;
   subtasks: Subtask[];
+  recurrenceType: 'none' | RecurrenceType;
+  recurrenceDays: number[];
 }
 
 const emptyForm = (): FormState => ({
   title: '', description: '', priority: 'medium', subject: '',
   tagsInput: '', deadlineDate: undefined, deadlineTime: '23:59', subtasks: [],
+  recurrenceType: 'none', recurrenceDays: [],
 });
+
+/** Build the recurrence rule to save from the form, or undefined for "None". */
+function formRecurrence(f: FormState): TaskRecurrence | undefined {
+  if (f.recurrenceType === 'none') return undefined;
+  if (f.recurrenceType === 'weekdays') return { type: 'weekdays', days: f.recurrenceDays };
+  return { type: f.recurrenceType };
+}
 
 /** Build an ISO deadline from the form's date + time, if a date is set. */
 function formDeadlineIso(f: FormState): string | undefined {
@@ -107,6 +127,8 @@ export default function Tasks() {
       deadlineDate: d,
       deadlineTime: d ? format(d, 'HH:mm') : '23:59',
       subtasks: t.subtasks || [],
+      recurrenceType: t.recurrence?.type ?? 'none',
+      recurrenceDays: t.recurrence?.days ?? [],
     });
     setEditorOpen(true);
   };
@@ -133,6 +155,7 @@ export default function Tasks() {
           tags,
           deadline,
           subtasks: form.subtasks,
+          recurrence: formRecurrence(form),
         },
       });
     } else {
@@ -148,6 +171,7 @@ export default function Tasks() {
         deadline,
         createdAt: new Date().toISOString(),
         subtasks: form.subtasks,
+        recurrence: formRecurrence(form),
       };
       dispatch({ type: 'ADD_TASK', task });
     }
@@ -316,6 +340,11 @@ export default function Tasks() {
                           🗓 {formatDeadline(task.deadline)}
                         </span>
                       )}
+                      {task.recurrence && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium inline-flex items-center gap-1">
+                          <Repeat className="h-2.5 w-2.5" /> {recurrenceLabel(task.recurrence)}
+                        </span>
+                      )}
                       {(task.tags || []).map(tag => (
                         <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                           #{tag}
@@ -479,6 +508,53 @@ export default function Tasks() {
               </div>
             </div>
             <div>
+              <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1">
+                <Repeat className="h-3 w-3" /> Repeat
+              </label>
+              <Select
+                value={form.recurrenceType}
+                onValueChange={v => setForm(f => ({ ...f, recurrenceType: v as FormState['recurrenceType'] }))}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Doesn't repeat</SelectItem>
+                  <SelectItem value="daily">Daily</SelectItem>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="weekdays">Chosen weekdays</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.recurrenceType === 'weekdays' && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {DAY_LABELS.map((label, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setForm(f => ({
+                        ...f,
+                        recurrenceDays: f.recurrenceDays.includes(i)
+                          ? f.recurrenceDays.filter(d => d !== i)
+                          : [...f.recurrenceDays, i],
+                      }))}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors',
+                        form.recurrenceDays.includes(i)
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-muted text-muted-foreground border-transparent hover:bg-secondary'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {form.recurrenceType !== 'none' && !form.deadlineDate && (
+                <p className="text-xs text-muted-foreground mt-1.5">
+                  Tip: add a deadline so we know when each occurrence is due.
+                </p>
+              )}
+            </div>
+
+            <div>
               <label className="text-xs text-muted-foreground mb-1 block">Tags (comma-separated, optional)</label>
               <Input
                 placeholder="e.g. exam, group-project"
@@ -528,7 +604,10 @@ export default function Tasks() {
 
             <div className="flex gap-2 pt-2 sticky bottom-0 bg-background pb-1">
               <Button variant="ghost" onClick={() => setEditorOpen(false)} className="ml-auto">Cancel</Button>
-              <Button onClick={saveTask} disabled={!form.title.trim()}>
+              <Button
+                onClick={saveTask}
+                disabled={!form.title.trim() || (form.recurrenceType === 'weekdays' && form.recurrenceDays.length === 0)}
+              >
                 {editingId ? 'Save' : 'Add Task'}
               </Button>
             </div>
