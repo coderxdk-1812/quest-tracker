@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getRank, getNextRank, rankProgress, levelFromXp, RANKS } from './progression';
+import { getRank, getNextRank, rankProgress, levelFromXp, detectLevelUpEvent, RANKS } from './progression';
 
 describe('progression', () => {
   it('maps levels to the correct rank band', () => {
@@ -39,5 +39,31 @@ describe('progression', () => {
     for (let i = 1; i < RANKS.length; i++) {
       expect(RANKS[i].minLevel).toBeGreaterThan(RANKS[i - 1].minLevel);
     }
+  });
+
+  describe('detectLevelUpEvent', () => {
+    it('is null when the level did not increase', () => {
+      expect(detectLevelUpEvent(5, 5)).toBeNull();
+      expect(detectLevelUpEvent(5, 4)).toBeNull();
+    });
+
+    it('is a plain level-up within the same rank band', () => {
+      const ev = detectLevelUpEvent(2, 3);
+      expect(ev).not.toBeNull();
+      expect(ev!.level).toBe(3);
+      expect(ev!.isRankUp).toBe(false);
+    });
+
+    it('flags a rank-up when crossing into a new band', () => {
+      const ev = detectLevelUpEvent(4, 5); // novice -> apprentice
+      expect(ev!.isRankUp).toBe(true);
+      expect(ev!.rankTitle).toBe('Apprentice');
+    });
+
+    it('still reports the correct rank when leveling up by more than one level', () => {
+      const ev = detectLevelUpEvent(3, 10); // novice -> adept, skipping apprentice
+      expect(ev!.isRankUp).toBe(true);
+      expect(ev!.rankTitle).toBe('Adept');
+    });
   });
 });

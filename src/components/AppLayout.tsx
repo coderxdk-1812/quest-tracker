@@ -12,6 +12,7 @@ import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { AuroraBackground } from '@/components/AuroraBackground';
 import { QuickCapture } from '@/components/QuickCapture';
 import { TaskCompleteFx } from '@/components/TaskCompleteFx';
+import { LevelUpCelebration } from '@/components/progression/LevelUpCelebration';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -27,6 +28,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <AuroraBackground />
       <QuickCapture />
       <TaskCompleteFx />
+      <LevelUpCelebration />
       <div className="relative z-10 min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">

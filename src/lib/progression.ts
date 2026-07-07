@@ -87,3 +87,31 @@ export function rankProgress(level: number): RankProgress {
 export function xpForLevel(level: number): number {
   return Math.max(0, (level - 1) * XP_PER_LEVEL);
 }
+
+export interface LevelUpEvent {
+  level: number;
+  rankTitle: string;
+  rankHsl: string;
+  /** True when this level-up also crossed into a new rank band. */
+  isRankUp: boolean;
+}
+
+/**
+ * Personality layer 3b: detects a level-up (and whether it's also a rank-up) so
+ * the UI can celebrate it. Null when newLevel didn't actually increase — callers
+ * are expected to only call this on a real change, but this stays a safe no-op
+ * either way (e.g. the initial DB-load jump from the reducer's default level
+ * isn't a "real" in-session level-up, and callers should guard for that
+ * separately since this function has no notion of "session start").
+ */
+export function detectLevelUpEvent(prevLevel: number, newLevel: number): LevelUpEvent | null {
+  if (newLevel <= prevLevel) return null;
+  const prevRank = getRank(prevLevel);
+  const newRank = getRank(newLevel);
+  return {
+    level: newLevel,
+    rankTitle: newRank.title,
+    rankHsl: newRank.hsl,
+    isRankUp: newRank.id !== prevRank.id,
+  };
+}
