@@ -101,6 +101,8 @@ export default function Settings() {
     if (!user) return;
     setSaving(true);
     try {
+      const existingNS: any = (profile as any)?.notification_settings || {};
+      const nextNS = { ...existingNS, notifyStreaks, notifyFriends, notifyDeadlines };
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -111,6 +113,7 @@ export default function Settings() {
           show_streak:          true,
           show_badges:          true,
           show_tasks_completed: showTasksCompleted,
+          notification_settings: nextNS,
         })
         .eq('user_id', user.id);
       if (error) throw error;
