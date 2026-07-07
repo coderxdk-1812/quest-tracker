@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { enableWebPush, disableWebPush, isWebPushActive, isWebPushSupported } from '@/lib/webPush';
 import { Settings as SettingsIcon, User, Bell, Shield, Moon, Sun, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
