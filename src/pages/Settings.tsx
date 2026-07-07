@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { enableWebPush, disableWebPush, isWebPushActive, isWebPushSupported } from '@/lib/webPush';
 import { Settings as SettingsIcon, User, Bell, Shield, Moon, Sun, Trash2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,8 +37,14 @@ export default function Settings() {
   const [showTasksCompleted, setShowTasksCompleted] = useState(true);
   const [notifyStreaks, setNotifyStreaks]        = useState(true);
   const [notifyFriends, setNotifyFriends]       = useState(true);
+  const [notifyDeadlines, setNotifyDeadlines]  = useState(true);
 
   const [saving, setSaving]                     = useState(false);
+
+  // Push notification state
+  const [pushEnabled, setPushEnabled]           = useState(false);
+  const [pushBusy, setPushBusy]                 = useState(false);
+  const pushSupported = isWebPushSupported();
 
   // Delete account dialog
   const [deleteOpen, setDeleteOpen]             = useState(false);
@@ -48,8 +55,32 @@ export default function Settings() {
       setDisplayName(profile.display_name ?? '');
       setUsername(profile.username ?? '');
       setShowTasksCompleted(profile.show_tasks_completed ?? true);
+      const ns: any = (profile as any).notification_settings || {};
+      if (typeof ns.notifyStreaks === 'boolean') setNotifyStreaks(ns.notifyStreaks);
+      if (typeof ns.notifyFriends === 'boolean') setNotifyFriends(ns.notifyFriends);
+      if (typeof ns.notifyDeadlines === 'boolean') setNotifyDeadlines(ns.notifyDeadlines);
     }
   }, [profile]);
+
+  useEffect(() => { isWebPushActive().then(setPushEnabled); }, []);
+
+  async function togglePush(next: boolean) {
+    if (!user) return;
+    setPushBusy(true);
+    try {
+      if (next) {
+        const r = await enableWebPush(user.id);
+        if (r.ok) { setPushEnabled(true); toast.success('Notifications enabled 🎉'); }
+        else toast.error(r.error || 'Could not enable notifications');
+      } else {
+        const r = await disableWebPush(user.id);
+        if (r.ok) { setPushEnabled(false); toast.success('Notifications turned off'); }
+        else toast.error(r.error || 'Could not disable notifications');
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   const isOwned = (id: ThemeId) =>
@@ -70,6 +101,8 @@ export default function Settings() {
     if (!user) return;
     setSaving(true);
     try {
+      const existingNS: any = (profile as any)?.notification_settings || {};
+      const nextNS = { ...existingNS, notifyStreaks, notifyFriends, notifyDeadlines };
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -80,6 +113,7 @@ export default function Settings() {
           show_streak:          true,
           show_badges:          true,
           show_tasks_completed: showTasksCompleted,
+          notification_settings: nextNS,
         })
         .eq('user_id', user.id);
       if (error) throw error;
@@ -232,11 +266,27 @@ export default function Settings() {
           <Bell className="h-5 w-5 text-primary" /> Notifications
         </h2>
         <div className="space-y-4">
-          {[
-            { label: 'Streak reminders', desc: 'Daily reminder to keep your streak alive', value: notifyStreaks,  set: setNotifyStreaks },
-            { label: 'Friend activity',  desc: 'When friends send requests or level up',   value: notifyFriends, set: setNotifyFriends },
-          ].map(pref => (
+          {/* Master enable — real browser Web Push */}
+          <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+            <div className="pr-4">
+              <p className="font-medium">Enable notifications</p>
+              <p className="text-sm text-muted-foreground">
+                Get desktop reminders — even when Questify's tab is closed.
+                {!pushSupported && ' (Not supported in this browser.)'}
+              </p>
+            </div>
+            <Switch
+              checked={pushEnabled}
+              disabled={!pushSupported || pushBusy}
+              onCheckedChange={togglePush}
+            />
+          </div>
 
+          {[
+            { label: 'Deadline reminders', desc: 'Nudges 24h and 2h before a task is due', value: notifyDeadlines, set: setNotifyDeadlines },
+            { label: 'Streak reminders',   desc: 'One gentle evening nudge if today is still blank', value: notifyStreaks, set: setNotifyStreaks },
+            { label: 'Friend activity',    desc: 'When friends send requests or level up',  value: notifyFriends, set: setNotifyFriends },
+          ].map(pref => (
             <div key={pref.label} className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{pref.label}</p>
