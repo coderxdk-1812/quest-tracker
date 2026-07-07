@@ -55,12 +55,10 @@ export default function Settings() {
       setDisplayName(profile.display_name ?? '');
       setUsername(profile.username ?? '');
       setShowTasksCompleted(profile.show_tasks_completed ?? true);
-      const np = (profile as any).notification_prefs;
-      if (np && typeof np === 'object') {
-        if (typeof np.notifyStreaks === 'boolean') setNotifyStreaks(np.notifyStreaks);
-        if (typeof np.notifyFriends === 'boolean') setNotifyFriends(np.notifyFriends);
-        if (typeof np.notifyDeadlines === 'boolean') setNotifyDeadlines(np.notifyDeadlines);
-      }
+      const ns: any = (profile as any).notification_settings || {};
+      if (typeof ns.notifyStreaks === 'boolean') setNotifyStreaks(ns.notifyStreaks);
+      if (typeof ns.notifyFriends === 'boolean') setNotifyFriends(ns.notifyFriends);
+      if (typeof ns.notifyDeadlines === 'boolean') setNotifyDeadlines(ns.notifyDeadlines);
     }
   }, [profile]);
 
