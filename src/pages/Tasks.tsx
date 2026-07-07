@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import type { RecurrenceType, TaskRecurrence } from '@/lib/recurrence';
 import { QuestBreakdown } from '@/components/tasks/QuestBreakdown';
+import { TaskCheckbox } from '@/components/tasks/TaskCheckbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -299,15 +300,7 @@ export default function Tasks() {
                   dlStatus === 'overdue' && 'ring-1 ring-destructive/50'
                 )}
               >
-                <button
-                  onClick={() => toggleTask(task.id)}
-                  className="shrink-0 mt-0.5"
-                  aria-label="Toggle complete"
-                >
-                  {task.completed
-                    ? <CheckCircle2 className="h-6 w-6 text-primary" />
-                    : <Circle className="h-6 w-6 text-muted-foreground hover:text-primary transition-colors" />}
-                </button>
+                <TaskCheckbox task={task} className="mt-0.5" />
 
                 <div className="flex-1 min-w-0">
                   <div className="cursor-pointer" onClick={() => openEdit(task)}>

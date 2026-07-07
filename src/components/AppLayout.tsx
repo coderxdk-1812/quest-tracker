@@ -6,15 +6,18 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useGame } from '@/context/GameContext';
 import { useQuickCapture } from '@/context/QuickCaptureContext';
+import { useTaskCompleteFx } from '@/context/TaskCompleteFxContext';
 import { NotificationScheduler } from '@/hooks/useNotificationScheduler';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { AuroraBackground } from '@/components/AuroraBackground';
 import { QuickCapture } from '@/components/QuickCapture';
+import { TaskCompleteFx } from '@/components/TaskCompleteFx';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state, dispatch } = useGame();
   const { open: openQuickCapture } = useQuickCapture();
+  const { hudTargetRef } = useTaskCompleteFx();
   const location = useLocation();
   useScrollReveal();
 
@@ -23,6 +26,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <NotificationScheduler />
       <AuroraBackground />
       <QuickCapture />
+      <TaskCompleteFx />
       <div className="relative z-10 min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
@@ -53,7 +57,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 <span className="text-lg">🪙</span>
                 <span className="text-coin font-bold">{state.coins}</span>
               </div>
-              <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm font-bold">
+              <div
+                ref={(el) => { hudTargetRef.current = el; }}
+                className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm font-bold"
+              >
                 <span className="text-level">Lv.{state.level}</span>
               </div>
             </div>

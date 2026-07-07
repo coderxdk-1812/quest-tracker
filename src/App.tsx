@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { GameProvider } from "@/context/GameContext";
 import { QuickCaptureProvider } from "@/context/QuickCaptureContext";
+import { TaskCompleteFxProvider } from "@/context/TaskCompleteFxContext";
 import { AppLayout } from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Timetable from "./pages/Timetable";
@@ -41,22 +42,24 @@ function ProtectedRoutes() {
 
   return (
     <GameProvider>
-      <QuickCaptureProvider>
-        <AppLayout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/timetable" element={<Timetable />} />
-            <Route path="/tasks" element={<Tasks />} />
-            <Route path="/focus" element={<FocusMode />} />
-            <Route path="/achievements" element={<Achievements />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/academics" element={<Academics />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AppLayout>
-      </QuickCaptureProvider>
+      <TaskCompleteFxProvider>
+        <QuickCaptureProvider>
+          <AppLayout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/timetable" element={<Timetable />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/focus" element={<FocusMode />} />
+              <Route path="/achievements" element={<Achievements />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/academics" element={<Academics />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppLayout>
+        </QuickCaptureProvider>
+      </TaskCompleteFxProvider>
     </GameProvider>
   );
 }

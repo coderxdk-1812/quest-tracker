@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
+import { TaskCheckbox } from '@/components/tasks/TaskCheckbox';
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay, isSameMonth, isToday, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -264,11 +265,7 @@ export default function Timetable() {
                   t.completed && 'opacity-50'
                 )}
               >
-                <button onClick={() => toggleTask(t.id)}>
-                  {t.completed
-                    ? <CheckCircle2 className="h-5 w-5 text-primary" />
-                    : <Circle className="h-5 w-5 text-muted-foreground" />}
-                </button>
+                <TaskCheckbox task={t} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className={cn('text-sm font-medium truncate', t.completed && 'line-through')}>{t.title}</p>
                   {t.subject && (
