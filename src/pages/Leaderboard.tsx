@@ -75,7 +75,7 @@ export default function Leaderboard() {
           <p className="text-center text-danger py-10 text-sm">{error}</p>
         ) : total === 0 ? (
           <p className="text-center text-muted-foreground py-10 text-sm">
-            Complete a task to join this week's league!
+            This week's league is wide open — complete a task and stake your claim! 🏁
           </p>
         ) : (
           <div className="space-y-1">

@@ -407,8 +407,17 @@ export default function Tasks() {
 
         {filtered.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            <p className="text-4xl mb-2">📝</p>
-            <p>No tasks match your filters.</p>
+            {state.tasks.length === 0 ? (
+              <>
+                <p className="text-4xl mb-2">🌱</p>
+                <p>A blank page, full of potential. What's the first thing on your mind?</p>
+              </>
+            ) : (
+              <>
+                <p className="text-4xl mb-2">🔍</p>
+                <p>Nothing matches that combination — try loosening a filter.</p>
+              </>
+            )}
           </div>
         )}
       </div>

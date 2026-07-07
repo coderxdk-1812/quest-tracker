@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -156,7 +157,11 @@ export default function Settings() {
         <div>
           <p className="font-medium mb-3">Theme</p>
           {ownedThemes.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No themes purchased yet. Visit the Shop to unlock more!</p>
+            <p className="text-sm text-muted-foreground">
+              No themes unlocked yet — the{' '}
+              <Link to="/shop" className="text-primary hover:underline font-medium">Shop</Link>{' '}
+              has some good ones waiting.
+            </p>
           ) : (
             <div className="flex flex-wrap gap-3">
               {ownedThemes.map(t => {

@@ -81,7 +81,10 @@ export function TodaySchedule() {
       )}
 
       {todayClasses.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No classes scheduled today. Add some in your Timetable!</p>
+        <p className="text-sm text-muted-foreground">
+          A clear day on the calendar. Line up your week in the{' '}
+          <Link to="/timetable" className="text-primary hover:underline font-medium">Timetable →</Link>
+        </p>
       ) : (
         <>
           {upcoming && (

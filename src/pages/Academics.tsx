@@ -87,7 +87,7 @@ export default function Academics() {
         {loading ? (
           <p className="text-sm text-muted-foreground py-4 text-center">Loading…</p>
         ) : goals.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">No goals yet — add what you're working toward.</p>
+          <p className="text-sm text-muted-foreground py-4 text-center">No goals yet — what's the mountain you're climbing this term? Add one above.</p>
         ) : (
           <div className="space-y-3">
             {goals.map(g => {
@@ -140,7 +140,7 @@ export default function Academics() {
           What you've actually put in — tasks count by their subject <em>or</em> a matching tag. ({state.focusSessionsCompleted} focus sessions all-time)
         </p>
         {effort.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-2">Add a subject or tag to your tasks to see effort here.</p>
+          <p className="text-sm text-muted-foreground py-2">Tag a task with a subject and your effort will start showing up here.</p>
         ) : (
           <div className="space-y-2">
             {effort.map(e => (
@@ -170,7 +170,7 @@ export default function Academics() {
         </div>
 
         {confidenceBySubject.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-2">No topics yet — add a few to track how ready you feel.</p>
+          <p className="text-sm text-muted-foreground py-2">No topics yet — add the ones that make you nervous, and watch them turn green. 🟢</p>
         ) : (
           <div className="space-y-3">
             {confidenceBySubject.map(([subject, topics]) => (

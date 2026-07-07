@@ -1,4 +1,5 @@
 import { useGame } from '@/context/GameContext';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CheckSquare, Coins, TrendingUp, Brain, Trophy } from 'lucide-react';
 import { DailyQuests } from '@/components/dashboard/DailyQuests';
@@ -63,7 +64,10 @@ export default function Dashboard() {
             <CheckSquare className="h-5 w-5 text-primary" /> Today's Tasks
           </h2>
           {totalToday === 0 ? (
-            <p className="text-muted-foreground text-sm">No tasks yet. Add some in the Tasks tab!</p>
+            <p className="text-muted-foreground text-sm">
+              Nothing queued up yet — future you will thank present you for adding one.{' '}
+              <Link to="/tasks" className="text-primary hover:underline font-medium">Add a task →</Link>
+            </p>
           ) : (
             <>
               <div className="flex items-center justify-between mb-3">
