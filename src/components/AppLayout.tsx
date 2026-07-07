@@ -1,16 +1,20 @@
 import { ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { useGame } from '@/context/GameContext';
+import { useQuickCapture } from '@/context/QuickCaptureContext';
 import { NotificationScheduler } from '@/hooks/useNotificationScheduler';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { AuroraBackground } from '@/components/AuroraBackground';
+import { QuickCapture } from '@/components/QuickCapture';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state, dispatch } = useGame();
+  const { open: openQuickCapture } = useQuickCapture();
   const location = useLocation();
   useScrollReveal();
 
@@ -18,12 +22,21 @@ export function AppLayout({ children }: { children: ReactNode }) {
     <SidebarProvider>
       <NotificationScheduler />
       <AuroraBackground />
+      <QuickCapture />
       <div className="relative z-10 min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="h-14 flex items-center justify-between border-b border-border px-4">
             <SidebarTrigger />
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => openQuickCapture()}
+                className="p-1.5 rounded-lg hover:bg-muted hover:scale-110 transition-all"
+                title="Quick add task"
+                aria-label="Quick add task"
+              >
+                <Plus className="h-5 w-5 text-primary" />
+              </button>
               <button
                 onClick={() => dispatch({ type: 'SET_DARK_MODE', enabled: !state.darkMode })}
                 className="text-xl hover:scale-110 transition-transform"
