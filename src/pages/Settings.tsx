@@ -266,11 +266,27 @@ export default function Settings() {
           <Bell className="h-5 w-5 text-primary" /> Notifications
         </h2>
         <div className="space-y-4">
-          {[
-            { label: 'Streak reminders', desc: 'Daily reminder to keep your streak alive', value: notifyStreaks,  set: setNotifyStreaks },
-            { label: 'Friend activity',  desc: 'When friends send requests or level up',   value: notifyFriends, set: setNotifyFriends },
-          ].map(pref => (
+          {/* Master enable — real browser Web Push */}
+          <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+            <div className="pr-4">
+              <p className="font-medium">Enable notifications</p>
+              <p className="text-sm text-muted-foreground">
+                Get desktop reminders — even when Questify's tab is closed.
+                {!pushSupported && ' (Not supported in this browser.)'}
+              </p>
+            </div>
+            <Switch
+              checked={pushEnabled}
+              disabled={!pushSupported || pushBusy}
+              onCheckedChange={togglePush}
+            />
+          </div>
 
+          {[
+            { label: 'Deadline reminders', desc: 'Nudges 24h and 2h before a task is due', value: notifyDeadlines, set: setNotifyDeadlines },
+            { label: 'Streak reminders',   desc: 'One gentle evening nudge if today is still blank', value: notifyStreaks, set: setNotifyStreaks },
+            { label: 'Friend activity',    desc: 'When friends send requests or level up',  value: notifyFriends, set: setNotifyFriends },
+          ].map(pref => (
             <div key={pref.label} className="flex items-center justify-between">
               <div>
                 <p className="font-medium">{pref.label}</p>
