@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
 import { useGame } from '@/context/GameContext';
-import { Clock, CalendarDays } from 'lucide-react';
+import { useQuickCapture } from '@/context/QuickCaptureContext';
+import { Clock, CalendarDays, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { getTimetableNudge } from '@/lib/timetableNudge';
 
 function getBlockColour(colour?: string): string {
   if (colour && colour.startsWith('#')) return colour;
@@ -15,6 +17,7 @@ function getBlockColour(colour?: string): string {
 
 export function TodaySchedule() {
   const { state } = useGame();
+  const { open: openQuickCapture } = useQuickCapture();
 
   const todayIdx = useMemo(() => {
     // Mon = 0 ... Sun = 6
@@ -43,6 +46,12 @@ export function TodaySchedule() {
 
   const upcoming = todayClasses.find(c => toMin(c.endTime) > nowMin);
 
+  // Gentle nudge (spec §4): a class today with no open task yet for that subject.
+  const nudge = useMemo(
+    () => getTimetableNudge(state.timetable, state.tasks, todayIdx),
+    [state.timetable, state.tasks, todayIdx],
+  );
+
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
@@ -52,6 +61,24 @@ export function TodaySchedule() {
         </h2>
         <Link to="/timetable" className="text-xs text-primary hover:underline">View all →</Link>
       </div>
+
+      {nudge && (
+        <div className="rounded-lg bg-primary/5 border border-primary/20 p-3 mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm flex items-center gap-1.5 min-w-0">
+            <Sparkles className="h-4 w-4 text-primary shrink-0" />
+            <span className="truncate">
+              You have <span className="font-semibold">{nudge.subject}</span> today — got a{' '}
+              <span className="font-semibold">{nudge.subject}</span> task?
+            </span>
+          </p>
+          <button
+            onClick={() => openQuickCapture({ subject: nudge.subject })}
+            className="text-xs font-semibold text-primary hover:underline shrink-0"
+          >
+            Add task
+          </button>
+        </div>
+      )}
 
       {todayClasses.length === 0 ? (
         <p className="text-sm text-muted-foreground">No classes scheduled today. Add some in your Timetable!</p>
