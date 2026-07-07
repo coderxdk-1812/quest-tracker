@@ -12,6 +12,7 @@ import { DailyCue } from '@/components/dashboard/DailyCue';
 import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist';
 import { MilestonesCard } from '@/components/dashboard/MilestonesCard';
 import { MasteryCard } from '@/components/dashboard/MasteryCard';
+import { PerfectWeekCard } from '@/components/dashboard/PerfectWeekCard';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
@@ -50,7 +51,10 @@ export default function Dashboard() {
       </motion.div>
 
       <motion.div variants={item}><MasteryCard /></motion.div>
-      <motion.div variants={item}><MilestonesCard /></motion.div>
+      <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
+        <MilestonesCard />
+        <PerfectWeekCard />
+      </motion.div>
 
       <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
         <div className="glass-card p-6">
