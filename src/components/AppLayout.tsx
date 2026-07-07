@@ -16,6 +16,7 @@ import { LevelUpCelebration } from '@/components/progression/LevelUpCelebration'
 import { StreakFlame } from '@/components/StreakFlame';
 import { StreakSavedMoment } from '@/components/StreakSavedMoment';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useCountUp } from '@/hooks/useCountUp';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state, dispatch } = useGame();
@@ -23,6 +24,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { hudTargetRef } = useTaskCompleteFx();
   const location = useLocation();
   useScrollReveal();
+  const streak = useCountUp(state.streak);
+  const coins = useCountUp(state.coins);
+  const level = useCountUp(state.level);
 
   return (
     <SidebarProvider>
@@ -56,17 +60,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <ThemeSwitcher />
               <div className="flex items-center gap-1 text-sm font-medium">
                 <StreakFlame streak={state.streak} />
-                <span className="text-streak font-bold">{state.streak}</span>
+                <span className="text-streak font-bold tabular-nums">{streak}</span>
               </div>
               <div className="flex items-center gap-1 text-sm font-medium">
                 <span className="text-lg">🪙</span>
-                <span className="text-coin font-bold">{state.coins}</span>
+                <span className="text-coin font-bold tabular-nums">{coins}</span>
               </div>
               <div
                 ref={(el) => { hudTargetRef.current = el; }}
                 className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm font-bold"
               >
-                <span className="text-level">Lv.{state.level}</span>
+                <span className="text-level tabular-nums">Lv.{level}</span>
               </div>
             </div>
           </header>

@@ -13,6 +13,7 @@ import { OnboardingChecklist } from '@/components/dashboard/OnboardingChecklist'
 import { MilestonesCard } from '@/components/dashboard/MilestonesCard';
 import { MasteryCard } from '@/components/dashboard/MasteryCard';
 import { PerfectWeekCard } from '@/components/dashboard/PerfectWeekCard';
+import { useCountUp } from '@/hooks/useCountUp';
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
@@ -39,10 +40,10 @@ export default function Dashboard() {
       <motion.div variants={item}><NextMoveCard /></motion.div>
 
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={<Coins className="h-5 w-5" />} label="Coins" value={state.coins.toString()} gradient="coin-gradient" />
-        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="Tasks Done" value={state.totalTasksCompleted.toString()} gradient="xp-gradient" />
-        <StatCard icon={<Brain className="h-5 w-5" />} label="Focus Sessions" value={state.focusSessionsCompleted.toString()} gradient="level-gradient" />
-        <StatCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={unlockedAchievements.length.toString()} gradient="streak-gradient" />
+        <StatCard icon={<Coins className="h-5 w-5" />} label="Coins" value={state.coins} gradient="coin-gradient" />
+        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="Tasks Done" value={state.totalTasksCompleted} gradient="xp-gradient" />
+        <StatCard icon={<Brain className="h-5 w-5" />} label="Focus Sessions" value={state.focusSessionsCompleted} gradient="level-gradient" />
+        <StatCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={unlockedAchievements.length} gradient="streak-gradient" />
       </motion.div>
 
       <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
@@ -108,13 +109,14 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ icon, label, value, gradient }: { icon: React.ReactNode; label: string; value: string; gradient: string; }) {
+function StatCard({ icon, label, value, gradient }: { icon: React.ReactNode; label: string; value: number; gradient: string; }) {
+  const display = useCountUp(value);
   return (
     <div className="glass-card p-4 flex items-center gap-3">
       <div className={`w-10 h-10 rounded-xl ${gradient} flex items-center justify-center text-primary-foreground shrink-0`}>{icon}</div>
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-display font-bold text-lg leading-tight">{value}</p>
+        <p className="font-display font-bold text-lg leading-tight tabular-nums">{display}</p>
       </div>
     </div>
   );

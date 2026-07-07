@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { AvatarsTab } from '@/components/shop/AvatarsTab';
+import { useCountUp } from '@/hooks/useCountUp';
 
 const CATEGORIES = [
   { id: 'powerup' as const,  label: 'Power-Ups', icon: Zap },
@@ -79,7 +80,7 @@ export default function Shop() {
   const [activeCategory, setActiveCategory] = useState<Category>('powerup');
   const [mysteryReward, setMysteryReward] = useState<MysteryReward | null>(null);
   const [mysterySpinning, setMysterySpinning] = useState(false);
-
+  const displayCoins = useCountUp(state.coins);
 
   const filteredItems = SHOP_ITEMS.filter(i => i.category === activeCategory);
 
@@ -187,7 +188,7 @@ export default function Shop() {
           <div className="w-8 h-8 rounded-lg coin-gradient flex items-center justify-center">
             <Coins className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-xl">{state.coins}</span>
+          <span className="font-display font-bold text-xl tabular-nums">{displayCoins}</span>
         </div>
       </div>
 

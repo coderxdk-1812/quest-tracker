@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useCountUp } from '@/hooks/useCountUp';
 
 interface LevelRingProps {
   level: number;
@@ -17,6 +18,7 @@ export function LevelRing({ level, progress, size = 72, hsl = '145 63% 42%' }: L
   const pct = Math.max(0, Math.min(100, progress));
   const offset = c - (pct / 100) * c;
   const color = `hsl(${hsl})`;
+  const displayLevel = useCountUp(level);
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
@@ -33,7 +35,7 @@ export function LevelRing({ level, progress, size = 72, hsl = '145 63% 42%' }: L
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[9px] uppercase tracking-wider text-muted-foreground leading-none">Lvl</span>
-        <span className="font-display font-bold leading-none" style={{ fontSize: size * 0.32 }}>{level}</span>
+        <span className="font-display font-bold leading-none tabular-nums" style={{ fontSize: size * 0.32 }}>{displayLevel}</span>
       </div>
     </div>
   );
