@@ -37,8 +37,14 @@ export default function Settings() {
   const [showTasksCompleted, setShowTasksCompleted] = useState(true);
   const [notifyStreaks, setNotifyStreaks]        = useState(true);
   const [notifyFriends, setNotifyFriends]       = useState(true);
+  const [notifyDeadlines, setNotifyDeadlines]  = useState(true);
 
   const [saving, setSaving]                     = useState(false);
+
+  // Push notification state
+  const [pushEnabled, setPushEnabled]           = useState(false);
+  const [pushBusy, setPushBusy]                 = useState(false);
+  const pushSupported = isWebPushSupported();
 
   // Delete account dialog
   const [deleteOpen, setDeleteOpen]             = useState(false);
@@ -49,8 +55,34 @@ export default function Settings() {
       setDisplayName(profile.display_name ?? '');
       setUsername(profile.username ?? '');
       setShowTasksCompleted(profile.show_tasks_completed ?? true);
+      const np = (profile as any).notification_prefs;
+      if (np && typeof np === 'object') {
+        if (typeof np.notifyStreaks === 'boolean') setNotifyStreaks(np.notifyStreaks);
+        if (typeof np.notifyFriends === 'boolean') setNotifyFriends(np.notifyFriends);
+        if (typeof np.notifyDeadlines === 'boolean') setNotifyDeadlines(np.notifyDeadlines);
+      }
     }
   }, [profile]);
+
+  useEffect(() => { isWebPushActive().then(setPushEnabled); }, []);
+
+  async function togglePush(next: boolean) {
+    if (!user) return;
+    setPushBusy(true);
+    try {
+      if (next) {
+        const r = await enableWebPush(user.id);
+        if (r.ok) { setPushEnabled(true); toast.success('Notifications enabled 🎉'); }
+        else toast.error(r.error || 'Could not enable notifications');
+      } else {
+        const r = await disableWebPush(user.id);
+        if (r.ok) { setPushEnabled(false); toast.success('Notifications turned off'); }
+        else toast.error(r.error || 'Could not disable notifications');
+      }
+    } finally {
+      setPushBusy(false);
+    }
+  }
 
   // ── Theme helpers ──────────────────────────────────────────────────────────
   const isOwned = (id: ThemeId) =>
