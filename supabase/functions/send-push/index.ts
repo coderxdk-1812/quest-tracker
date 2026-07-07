@@ -85,7 +85,7 @@ interface Prefs {
 }
 
 function readPrefs(profile: any): Prefs {
-  const p = profile?.notification_prefs || {};
+  const p = profile?.notification_settings || {};
   return {
     notifyStreaks: p.notifyStreaks !== false,
     notifyDeadlines: p.notifyDeadlines !== false,
