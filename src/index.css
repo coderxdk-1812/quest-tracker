@@ -525,3 +525,19 @@ button { transition: transform 0.14s cubic-bezier(0.22,1,0.36,1); }
   .reveal { opacity: 1; transform: none; transition: none; }
   button:active, [role="button"]:active { transform: none; }
 }
+
+/* ─── Personality Pass: visual identity ──────────────────────────────── */
+/* Shared hover language for solid/outline/secondary buttons, matching the
+   glass-card lift so cards and buttons read as one system. Ghost/link
+   variants opt out (they're meant to stay flat/inline). Wrapping in
+   no-preference (rather than adding-then-undoing under reduce) means this
+   simply doesn't exist for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  .btn-lift {
+    transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  .btn-lift:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.35);
+  }
+}
