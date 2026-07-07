@@ -111,7 +111,7 @@ async function runCron() {
   // Pull profiles for prefs
   const { data: profiles } = await admin
     .from("profiles")
-    .select("user_id, display_name, notification_prefs")
+    .select("user_id, display_name, notification_settings")
     .in("user_id", userIds);
   const profileMap = new Map<string, any>();
   (profiles || []).forEach((p) => profileMap.set(p.user_id, p));
