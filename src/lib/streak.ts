@@ -48,3 +48,26 @@ export function getStreakStatus(opts: {
       ? `You missed a day — use a streak freeze to save your ${opts.streak}-day streak.`
       : `Streak broken. Start a fresh one today — you've got this.` };
 }
+
+/**
+ * Personality layer 3c: a streak freeze only ever gets consumed by CHECK_STREAK
+ * saving an at-risk streak (shop purchases only ever add freezes) — so a plain
+ * decrease reliably means "a save just happened," worth a warm moment in the UI.
+ */
+export function isStreakSaveEvent(prevFreezes: number, newFreezes: number): boolean {
+  return newFreezes < prevFreezes;
+}
+
+/**
+ * Streak-length tier used to scale the header flame's idle intensity (spec 3c).
+ * Matches milestones.ts's existing streak tiers (3/7/30/100) so the flame's
+ * "growth" lines up with the milestones the user is already chasing.
+ */
+export type StreakTier = 0 | 1 | 2 | 3;
+
+export function streakTier(streak: number): StreakTier {
+  if (streak >= 30) return 3;
+  if (streak >= 7) return 2;
+  if (streak >= 3) return 1;
+  return 0;
+}

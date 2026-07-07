@@ -13,6 +13,8 @@ import { AuroraBackground } from '@/components/AuroraBackground';
 import { QuickCapture } from '@/components/QuickCapture';
 import { TaskCompleteFx } from '@/components/TaskCompleteFx';
 import { LevelUpCelebration } from '@/components/progression/LevelUpCelebration';
+import { StreakFlame } from '@/components/StreakFlame';
+import { StreakSavedMoment } from '@/components/StreakSavedMoment';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -29,6 +31,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       <QuickCapture />
       <TaskCompleteFx />
       <LevelUpCelebration />
+      <StreakSavedMoment />
       <div className="relative z-10 min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
@@ -52,7 +55,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
               <ThemeSwitcher />
               <div className="flex items-center gap-1 text-sm font-medium">
-                <span className="text-lg">🔥</span>
+                <StreakFlame streak={state.streak} />
                 <span className="text-streak font-bold">{state.streak}</span>
               </div>
               <div className="flex items-center gap-1 text-sm font-medium">
