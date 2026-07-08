@@ -1,48 +1,70 @@
 import { motion } from 'framer-motion';
-import { Flame, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
 import { getRank, rankProgress } from '@/lib/progression';
 import { LevelRing } from './LevelRing';
-import { RankBadge, rankIcon } from './RankBadge';
+import { rankIcon } from './RankBadge';
+import { HeroBlobBackground } from '@/components/dashboard/HeroBlobBackground';
+import { StreakFlame } from '@/components/StreakFlame';
 
 /**
- * Hero progression HUD — the identity-and-progress anchor for the dashboard.
- * Replaces the "dashboard" feel with a rank/progression feel (spec §2).
+ * Hero progression HUD — the dashboard's showpiece, not a stat card (spec:
+ * personality redesign). One focal point (the headline), an oversized ring as
+ * a secondary anchor, and the streak folded into a small corner detail rather
+ * than a fourth chip competing for the same attention.
  */
 export function ProgressionHud() {
   const { state, xpProgress, xpToNextLevel } = useGame();
   const rank = getRank(state.level);
   const rp = rankProgress(state.level);
+  const RankIcon = rankIcon(rank);
   const NextIcon = rp.next ? rankIcon(rp.next) : null;
 
   return (
-    <div className="glass-card p-5">
-      <div className="flex items-center gap-4">
-        <LevelRing level={state.level} progress={xpProgress} hsl={rank.hsl} />
+    <div className="glass-card relative overflow-hidden rounded-2xl p-6 md:p-9">
+      <HeroBlobBackground />
+
+      <div className="absolute top-5 right-6 md:right-8 flex items-center gap-1.5 text-sm font-bold text-streak">
+        <StreakFlame streak={state.streak} />
+        <span className="tabular-nums">{state.streak}</span>
+      </div>
+
+      <div className="relative flex flex-col md:flex-row md:items-center gap-7 md:gap-10">
+        <LevelRing level={state.level} progress={xpProgress} hsl={rank.hsl} size={140} />
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <RankBadge level={state.level} size="md" />
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-streak">
-              <Flame className="h-3.5 w-3.5" /> {state.streak}-day streak
-            </span>
+          <div
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold mb-3"
+            style={{
+              color: `hsl(${rank.hsl})`,
+              backgroundColor: `hsl(${rank.hsl} / 0.12)`,
+              border: `1px solid hsl(${rank.hsl} / 0.35)`,
+            }}
+          >
+            <RankIcon className="h-3.5 w-3.5" /> {rank.title}
           </div>
-          <p className="text-xs text-muted-foreground mt-1.5">
-            {xpToNextLevel} XP to level {state.level + 1}
+
+          {rp.next ? (
+            <h2 className="font-display font-extrabold text-2xl md:text-[32px] leading-tight tracking-tight">
+              {xpToNextLevel} XP to <span style={{ color: `hsl(${rp.next.hsl})` }}>{rp.next.title}</span>.
+            </h2>
+          ) : (
+            <h2
+              className="font-display font-extrabold text-2xl md:text-[32px] leading-tight tracking-tight"
+              style={{ color: `hsl(${rank.hsl})` }}
+            >
+              Max rank reached — you're a Legend.
+            </h2>
+          )}
+
+          <p className="font-body text-sm text-muted-foreground mt-2 max-w-md">
+            {state.streak > 0
+              ? `${state.streak}-day streak — keep today's momentum going.`
+              : "Complete a task today to start your streak."}
           </p>
 
-          {/* progress toward next rank */}
-          {rp.next ? (
-            <div className="mt-2">
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1">
-                <span>{rank.title}</span>
-                <span className="inline-flex items-center gap-0.5">
-                  {NextIcon && <NextIcon className="h-3 w-3" style={{ color: `hsl(${rp.next.hsl})` }} />}
-                  {rp.next.title}
-                  <ChevronRight className="h-3 w-3" />
-                  <span className="font-bold">{rp.levelsToNext} lvl</span>
-                </span>
-              </div>
+          {rp.next && (
+            <div className="mt-4 max-w-sm">
               <div className="h-1.5 rounded-full bg-muted overflow-hidden">
                 <motion.div
                   className="h-full rounded-full"
@@ -52,11 +74,15 @@ export function ProgressionHud() {
                   transition={{ duration: 0.7 }}
                 />
               </div>
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground mt-1.5">
+                <span>{rank.title}</span>
+                <span className="inline-flex items-center gap-0.5 font-semibold">
+                  {NextIcon && <NextIcon className="h-3 w-3" style={{ color: `hsl(${rp.next.hsl})` }} />}
+                  {rp.levelsToNext} lvl to {rp.next.title}
+                  <ChevronRight className="h-3 w-3" />
+                </span>
+              </div>
             </div>
-          ) : (
-            <p className="mt-2 text-[11px] font-bold" style={{ color: `hsl(${rank.hsl})` }}>
-              Max rank reached — you are a Legend.
-            </p>
           )}
         </div>
       </div>
