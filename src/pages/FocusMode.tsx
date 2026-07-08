@@ -157,7 +157,7 @@ export default function FocusMode() {
   return (
     <div className="max-w-lg mx-auto space-y-8 flex flex-col items-center pt-8">
       <div className="text-center">
-        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">
+        <h1>
           {mode === 'focus' ? 'Focus Mode 🧠' : 'Break Time ☕'}
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -183,7 +183,7 @@ export default function FocusMode() {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-5xl font-display font-bold tabular-nums">
+          <span className="text-5xl font-bold tabular-nums">
             {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
           </span>
           <span className="text-sm text-muted-foreground mt-1 uppercase tracking-wider font-medium">

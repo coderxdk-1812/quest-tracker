@@ -26,7 +26,7 @@ function AuraPreview({ type, letter }: { type: AuraType | string; letter: string
   };
   return (
     <div
-      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-display font-bold shrink-0"
+      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-bold shrink-0"
       style={styles[type] || styles.none}
     >
       {letter}
@@ -179,7 +179,7 @@ export function AvatarsTab() {
               <div className="flex items-start gap-3">
                 <AuraPreview type={ai.auraKey || 'none'} letter="Q" />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold flex items-center gap-2">
+                  <h3 className="flex items-center gap-2">
                     {ai.icon} {ai.name}
                     {owned && ai.id !== 'mystery_box' && ai.id !== 'custom_title' && ai.id !== 'streak_crown' && (
                       <span className="text-xs text-primary font-medium">✓ Owned</span>
@@ -211,7 +211,7 @@ export function AvatarsTab() {
       <Dialog open={modal === 'custom_title'} onOpenChange={() => setModal(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-display">🏷️ Set Your Custom Title</DialogTitle>
+            <DialogTitle className="">🏷️ Set Your Custom Title</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <p className="text-sm text-muted-foreground">This title will appear under your name on your profile.</p>
@@ -237,7 +237,7 @@ export function AvatarsTab() {
       <Dialog open={modal === 'mystery_reveal'} onOpenChange={() => { setModal(null); setRevealItem(null); }}>
         <DialogContent className="text-center">
           <DialogHeader>
-            <DialogTitle className="font-display text-center">🎁 Mystery Avatar Box</DialogTitle>
+            <DialogTitle className="text-center">🎁 Mystery Avatar Box</DialogTitle>
           </DialogHeader>
           <div className="py-8 flex flex-col items-center gap-4">
             <AnimatePresence mode="wait">
@@ -269,7 +269,7 @@ export function AvatarsTab() {
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="font-display font-bold text-xl"
+                className="font-bold text-xl"
               >
                 {getMysteryLabel(revealItem)}
               </motion.p>

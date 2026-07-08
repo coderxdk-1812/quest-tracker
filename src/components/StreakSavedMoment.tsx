@@ -51,7 +51,7 @@ export function StreakSavedMoment() {
           <div className="streak-gradient rounded-xl px-5 py-3 shadow-lg flex items-center gap-3 text-white">
             <Flame className="h-5 w-5 shrink-0" />
             <div>
-              <p className="font-display font-bold text-sm leading-tight">Streak saved!</p>
+              <p className="font-bold text-sm leading-tight">Streak saved!</p>
               <p className="text-xs opacity-90">A freeze covered you — {saved.streak} days and counting 🔥</p>
             </div>
           </div>

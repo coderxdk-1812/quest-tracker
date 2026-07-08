@@ -55,7 +55,7 @@ export function TodaySchedule() {
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-lg flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
           Today's Schedule
         </h2>
@@ -93,7 +93,7 @@ export function TodaySchedule() {
               style={{ backgroundColor: getBlockColour(upcoming.subjectColor) }}
             >
               <p className="text-[10px] uppercase tracking-wider opacity-80 font-bold">Up next</p>
-              <p className="font-display font-bold text-lg leading-tight">{upcoming.subject}</p>
+              <p className="leading-tight">{upcoming.subject}</p>
               <p className="text-xs opacity-90 flex items-center gap-1 mt-0.5">
                 <Clock className="h-3 w-3" /> {upcoming.startTime}–{upcoming.endTime}
               </p>

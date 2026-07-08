@@ -28,7 +28,7 @@ export function DailyCue() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="font-display font-bold text-sm">{title}</p>
+            <p className="font-bold text-sm">{title}</p>
             <p className="text-xs text-muted-foreground">{message}</p>
           </div>
           <Button size="sm" className="gap-1 shrink-0" onClick={() => navigate('/tasks')}>

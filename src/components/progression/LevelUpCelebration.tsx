@@ -87,11 +87,11 @@ export function LevelUpCelebration() {
             <p className="text-xs font-semibold tracking-[3px] uppercase text-muted-foreground mb-1">
               {celebration.isRankUp ? 'Rank up' : 'Level up'}
             </p>
-            <p className="font-display font-extrabold text-5xl" style={{ color: `hsl(${celebration.rankHsl})` }}>
+            <p className="font-extrabold text-5xl" style={{ color: `hsl(${celebration.rankHsl})` }}>
               Level {celebration.level}
             </p>
             {celebration.isRankUp && (
-              <p className="font-display text-2xl mt-2 text-foreground">{celebration.rankTitle}</p>
+              <p className="text-2xl mt-2 text-foreground">{celebration.rankTitle}</p>
             )}
             <p className="text-xs text-muted-foreground mt-4">Tap anywhere to continue</p>
           </motion.div>

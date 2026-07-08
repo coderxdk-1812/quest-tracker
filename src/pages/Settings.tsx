@@ -141,7 +141,7 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
+        <h1 className="flex items-center gap-2">
           <SettingsIcon className="h-8 w-8 text-primary" /> Settings
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Manage your profile, appearance, and preferences.</p>
@@ -149,7 +149,7 @@ export default function Settings() {
 
       {/* Profile */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 space-y-5">
-        <h2 className="font-display font-bold text-base flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <User className="h-5 w-5 text-primary" /> Profile
         </h2>
         <div className="space-y-4">
@@ -170,7 +170,7 @@ export default function Settings() {
         animate={{ opacity: 1, y: 0, transition: { delay: 0.05 } }}
         className="glass-card p-6 space-y-5"
       >
-        <h2 className="font-display font-bold text-base flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           {state.darkMode ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
           Appearance
         </h2>
@@ -240,7 +240,7 @@ export default function Settings() {
         animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
         className="glass-card p-6 space-y-5"
       >
-        <h2 className="font-display font-bold text-base flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" /> Privacy
         </h2>
         <div className="rounded-xl bg-muted/50 p-4 text-sm text-muted-foreground">
@@ -262,7 +262,7 @@ export default function Settings() {
         animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
         className="glass-card p-6 space-y-5"
       >
-        <h2 className="font-display font-bold text-base flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-primary" /> Notifications
         </h2>
         <div className="space-y-4">

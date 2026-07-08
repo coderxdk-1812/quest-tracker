@@ -19,7 +19,7 @@ export default function Achievements() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Achievements 🏆</h1>
+        <h1>Achievements 🏆</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {unlocked.length}/{state.achievements.length} unlocked
         </p>
@@ -29,12 +29,12 @@ export default function Achievements() {
 
       {unlocked.length > 0 && (
         <div>
-          <h2 className="font-display font-bold text-lg mb-3">Unlocked</h2>
+          <h2 className="mb-3">Unlocked</h2>
           <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {unlocked.map(a => (
               <motion.div key={a.id} variants={item} className="glass-card p-4 text-center">
                 <span className="text-4xl block mb-2">{a.icon}</span>
-                <p className="font-display font-bold text-sm">{a.title}</p>
+                <p className="font-bold text-sm">{a.title}</p>
                 <p className="text-xs text-muted-foreground">{a.description}</p>
               </motion.div>
             ))}
@@ -44,12 +44,12 @@ export default function Achievements() {
 
       {locked.length > 0 && (
         <div>
-          <h2 className="font-display font-bold text-lg mb-3 text-muted-foreground">Locked</h2>
+          <h2 className="mb-3 text-muted-foreground">Locked</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {locked.map(a => (
               <div key={a.id} className="glass-card p-4 text-center opacity-40 grayscale">
                 <span className="text-4xl block mb-2">{a.icon}</span>
-                <p className="font-display font-bold text-sm">{a.title}</p>
+                <p className="font-bold text-sm">{a.title}</p>
                 <p className="text-xs text-muted-foreground">???</p>
               </div>
             ))}

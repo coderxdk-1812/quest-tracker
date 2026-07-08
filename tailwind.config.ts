@@ -18,6 +18,12 @@ export default {
         display: ['Playfair Display', 'serif'],
         body: ['Lora', 'serif'],
       },
+      fontSize: {
+        // Confident, not huge — weight and color carry hierarchy, not size.
+        h1: ['1.75rem', { lineHeight: '1.15', letterSpacing: '-0.02em', fontWeight: '600' }],
+        h2: ['1.25rem', { lineHeight: '1.2', letterSpacing: '-0.01em', fontWeight: '600' }],
+        h3: ['1.0625rem', { lineHeight: '1.25', fontWeight: '600' }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

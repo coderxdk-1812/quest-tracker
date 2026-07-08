@@ -329,7 +329,7 @@ export function DailyQuests() {
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-lg flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <Target className="h-5 w-5 text-primary" />
           Daily Quests
           {allDone && <Sparkles className="h-4 w-4 text-yellow-400 animate-pulse" />}

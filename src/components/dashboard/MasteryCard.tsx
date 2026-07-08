@@ -11,7 +11,7 @@ export function MasteryCard() {
   if (mastery.length === 0) return null;
   return (
     <GlowCard className="p-5" glowHsl="var(--level-purple)">
-      <h2 className="font-display font-bold text-lg mb-1 flex items-center gap-2">
+      <h2 className="mb-1 flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-primary" /> Mastery
       </h2>
       <p className="text-xs text-muted-foreground mb-4">You're getting better — level up each subject by finishing its tasks.</p>

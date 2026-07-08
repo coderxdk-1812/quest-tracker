@@ -179,7 +179,7 @@ export default function Shop() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
+          <h1 className="flex items-center gap-2">
             <ShoppingBag className="h-8 w-8 text-primary" /> Shop
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Spend coins on power-ups & themes. Earn badges through milestones!</p>
@@ -188,7 +188,7 @@ export default function Shop() {
           <div className="w-8 h-8 rounded-lg coin-gradient flex items-center justify-center">
             <Coins className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="font-display font-bold text-xl tabular-nums">{displayCoins}</span>
+          <span className="font-bold text-xl tabular-nums">{displayCoins}</span>
         </div>
       </div>
 
@@ -201,7 +201,7 @@ export default function Shop() {
             exit={{ opacity: 0, height: 0 }}
             className="glass-card p-4 border-primary/30 bg-primary/5"
           >
-            <h3 className="font-display font-bold text-sm mb-2 flex items-center gap-2">
+            <h3 className="mb-2 flex items-center gap-2">
               <Zap className="h-4 w-4 text-primary" /> Active Boosts
             </h3>
             <div className="flex gap-3 flex-wrap">
@@ -284,7 +284,7 @@ export default function Shop() {
                   <div className="flex items-start gap-3">
                     <span className={`text-3xl ${!earned ? 'grayscale' : ''}`}>{badge.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-bold">{badge.name}</h3>
+                      <h3 className="">{badge.name}</h3>
                       <p className="text-sm text-muted-foreground">{badge.description}</p>
                     </div>
                   </div>
@@ -326,7 +326,7 @@ export default function Shop() {
               <div className="flex items-start gap-3">
                 <span className="text-3xl">{shopItem.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold">{shopItem.name}</h3>
+                  <h3 className="">{shopItem.name}</h3>
                   <p className="text-sm text-muted-foreground">{shopItem.description}</p>
                 </div>
               </div>
@@ -356,7 +356,7 @@ export default function Shop() {
                   <div className="flex items-start gap-3">
                     <span className="text-3xl">✨</span>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-bold">Default</h3>
+                      <h3 className="">Default</h3>
                       <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export default function Shop() {
                 <div key={tier} className="space-y-3">
                   <div className="flex items-baseline justify-between">
                     <div>
-                      <h2 className="font-display font-bold text-lg">{meta.label}</h2>
+                      <h2 className="">{meta.label}</h2>
                       <p className="text-xs text-muted-foreground">{meta.blurb}</p>
                     </div>
                     <span className="text-xs text-muted-foreground font-medium tabular-nums">
@@ -410,7 +410,7 @@ export default function Shop() {
       <Dialog open={mysterySpinning || mysteryReward !== null} onOpenChange={(open) => { if (!open) { setMysteryReward(null); setMysterySpinning(false); } }}>
         <DialogContent className="text-center">
           <DialogHeader>
-            <DialogTitle className="font-display text-center flex items-center justify-center gap-2">
+            <DialogTitle className="text-center flex items-center justify-center gap-2">
               <Gift className="h-5 w-5 text-primary" /> Mystery Box
             </DialogTitle>
           </DialogHeader>
@@ -427,7 +427,7 @@ export default function Shop() {
               ) : null}
             </AnimatePresence>
             {!mysterySpinning && mysteryReward && (
-              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-display font-bold text-xl">
+              <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="font-bold text-xl">
                 {mysteryReward.kind === 'jackpot' ? '🎉 JACKPOT!' : 'You got:'}
                 <span className="block mt-1 text-base font-medium">{mysteryReward.label}</span>
               </motion.p>

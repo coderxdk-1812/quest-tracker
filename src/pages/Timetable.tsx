@@ -185,7 +185,7 @@ export default function Timetable() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Timetable 📅</h1>
+          <h1>Timetable 📅</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {view === 'week'
               ? `Week of ${format(startOfWeek(anchor, { weekStartsOn: 1 }), 'MMM d, yyyy')}`
@@ -252,7 +252,7 @@ export default function Timetable() {
       )}
 
       <div className="glass-card p-5">
-        <h2 className="font-display font-bold text-lg mb-3">Unscheduled</h2>
+        <h2 className="mb-3">Unscheduled</h2>
         {unscheduledTasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">All your tasks are scheduled. 🎉</p>
         ) : (
@@ -290,7 +290,7 @@ export default function Timetable() {
       <Dialog open={classDialogOpen} onOpenChange={setClassDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-display">
+            <DialogTitle className="">
               {form.id ? 'Edit Class' : 'Add Class'}
             </DialogTitle>
           </DialogHeader>
@@ -494,7 +494,7 @@ function WeekView({
               <div key={i} className={cn('p-2 text-center', today && 'bg-primary/5')}>
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{DAY_LABELS[i]}</div>
                 <div className={cn(
-                  'mt-0.5 inline-flex items-center justify-center text-sm font-display font-bold w-7 h-7 rounded-full',
+                  'mt-0.5 inline-flex items-center justify-center text-sm font-bold w-7 h-7 rounded-full',
                   today && 'bg-primary text-primary-foreground'
                 )}>
                   {format(d, 'd')}

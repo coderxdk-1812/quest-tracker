@@ -35,7 +35,7 @@ export default function Leaderboard() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
+          <h1 className="flex items-center gap-2">
             <Trophy className="h-7 w-7 text-primary" /> Weekly League
           </h1>
           <p className="text-muted-foreground text-sm mt-1">

@@ -52,7 +52,7 @@ export function OnboardingChecklist() {
         className="glass-card p-5 border border-primary/30"
       >
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-display font-bold text-lg flex items-center gap-2">
+          <h2 className="flex items-center gap-2">
             <Rocket className="h-5 w-5 text-primary" /> Get started
           </h2>
           <div className="flex items-center gap-2">

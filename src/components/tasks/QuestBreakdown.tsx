@@ -85,7 +85,7 @@ export function QuestBreakdown({
           <div className="h-8 w-8 rounded-lg xp-gradient flex items-center justify-center shrink-0">
             <Wand2 className="h-4 w-4 text-primary-foreground" />
           </div>
-          <p className="text-sm font-display font-bold">Break it into steps</p>
+          <p className="text-sm font-bold">Break it into steps</p>
         </div>
         {infoThin && (
           <p className="text-[11px] text-muted-foreground inline-flex items-start gap-1">
@@ -109,7 +109,7 @@ export function QuestBreakdown({
   return (
     <div className="glass-card p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-display font-bold flex items-center gap-1.5">
+        <p className="text-sm font-bold flex items-center gap-1.5">
           <Wand2 className="h-4 w-4 text-primary" /> Subtasks
           {allDone && <Sparkles className="h-3.5 w-3.5 text-yellow-400" />}
         </p>

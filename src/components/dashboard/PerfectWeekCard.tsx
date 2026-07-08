@@ -25,7 +25,7 @@ export function PerfectWeekCard() {
   return (
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-lg flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <CalendarCheck2 className="h-5 w-5 text-primary" /> Perfect Week
         </h2>
         <span className="text-xs px-2 py-1 rounded-full bg-primary/15 text-primary font-bold">

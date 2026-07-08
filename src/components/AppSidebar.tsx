@@ -47,7 +47,7 @@ export function AppSidebar() {
             <>
               <div className="mb-2 p-3 rounded-xl bg-muted">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-sm font-display font-bold text-foreground truncate">
+                  <span className="text-sm font-bold text-foreground truncate">
                     {profile?.display_name || profile?.username || 'Student'}
                   </span>
                   {game.equippedBadge && <span className="text-sm">{getBadgeEmoji(game.equippedBadge)}</span>}

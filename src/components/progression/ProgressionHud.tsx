@@ -45,19 +45,16 @@ export function ProgressionHud() {
           </div>
 
           {rp.next ? (
-            <h2 className="font-display font-extrabold text-2xl md:text-[32px] leading-tight tracking-tight">
+            <h2>
               {xpToNextLevel} XP to <span style={{ color: `hsl(${rp.next.hsl})` }}>{rp.next.title}</span>.
             </h2>
           ) : (
-            <h2
-              className="font-display font-extrabold text-2xl md:text-[32px] leading-tight tracking-tight"
-              style={{ color: `hsl(${rank.hsl})` }}
-            >
+            <h2 style={{ color: `hsl(${rank.hsl})` }}>
               Max rank reached — you're a Legend.
             </h2>
           )}
 
-          <p className="font-body text-sm text-muted-foreground mt-2 max-w-md">
+          <p className="text-sm text-muted-foreground mt-2 max-w-md">
             {state.streak > 0
               ? `${state.streak}-day streak — keep today's momentum going.`
               : "Complete a task today to start your streak."}

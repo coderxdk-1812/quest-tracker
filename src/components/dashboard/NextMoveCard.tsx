@@ -56,7 +56,7 @@ export function NextMoveCard() {
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1">
             <Compass className="h-3 w-3" /> Your next move
           </p>
-          <h3 className="font-display font-bold text-base leading-tight mt-0.5">{move.title}</h3>
+          <h3 className="leading-tight mt-0.5">{move.title}</h3>
           <p className="text-sm text-muted-foreground mt-1">{move.reason}</p>
           <Magnetic className="mt-3">
             <Button size="sm" className="gap-1.5" onClick={() => navigate(move.route)}>

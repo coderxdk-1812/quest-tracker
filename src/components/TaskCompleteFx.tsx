@@ -24,7 +24,7 @@ export function TaskCompleteFx() {
               animate={{ x: originCx + dx, y: originCy + dy, opacity: [0, 1, 1, 0], scale: 1 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               onAnimationComplete={() => dismissEvent(ev.id)}
-              className="fixed left-0 top-0 -translate-x-1/2 -translate-y-1/2 font-display font-bold text-sm text-primary whitespace-nowrap"
+              className="fixed left-0 top-0 -translate-x-1/2 -translate-y-1/2 font-bold text-sm text-primary whitespace-nowrap"
             >
               +{ev.xp} XP
             </motion.div>

@@ -25,7 +25,7 @@ export function StudyHeatmap() {
   return (
     <div className="glass-card p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-lg flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <Flame className="h-5 w-5 text-streak" />
           Activity (last 5 weeks)
         </h2>

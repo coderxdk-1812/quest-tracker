@@ -233,7 +233,7 @@ export default function Tasks() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Tasks ✅</h1>
+          <h1>Tasks ✅</h1>
           <p className="text-muted-foreground text-sm mt-1">Plan, prioritise and crush your assignments.</p>
         </div>
         <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />New Task</Button>
@@ -426,7 +426,7 @@ export default function Tasks() {
       <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display">{editingId ? 'Edit Task' : 'New Task'}</DialogTitle>
+            <DialogTitle className="">{editingId ? 'Edit Task' : 'New Task'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <Input

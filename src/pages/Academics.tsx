@@ -60,7 +60,7 @@ export default function Academics() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
+        <h1 className="flex items-center gap-2">
           <Target className="h-7 w-7 text-primary" /> Academics
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -73,7 +73,7 @@ export default function Academics() {
       <div className="grid md:grid-cols-2 gap-6 items-start">
       {/* GOALS */}
       <section className="glass-card p-5">
-        <h2 className="font-display font-bold text-lg mb-3">Goals</h2>
+        <h2 className="mb-3">Goals</h2>
 
         <div className="flex flex-wrap gap-2 mb-4">
           <Input placeholder='Goal, e.g. "Do well in Chemistry this term"' value={gTitle}
@@ -134,7 +134,7 @@ export default function Academics() {
 
       {/* EFFORT */}
       <section className="glass-card p-5">
-        <h2 className="font-display font-bold text-lg mb-1 flex items-center gap-2">
+        <h2 className="mb-1 flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" /> Effort by subject
         </h2>
         <p className="text-xs text-muted-foreground mb-3">
@@ -160,7 +160,7 @@ export default function Academics() {
 
       {/* CONFIDENCE */}
       <section className="glass-card p-5">
-        <h2 className="font-display font-bold text-lg mb-1 flex items-center gap-2">
+        <h2 className="mb-1 flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" /> Confidence
         </h2>
         <p className="text-xs text-muted-foreground mb-3">Tap a topic to cycle red → amber → green as you get readier.</p>

@@ -21,7 +21,7 @@ export function MilestonesCard() {
   return (
     <GlowCard className="p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-display font-bold text-lg flex items-center gap-2">
+        <h2 className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-primary" /> Milestones
         </h2>
         <span className="text-xs px-2 py-1 rounded-full bg-primary/15 text-primary font-bold">

@@ -55,7 +55,7 @@ export default function Dashboard() {
 
       <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
         <div className="glass-card p-6">
-          <h2 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+          <h2 className="mb-4 flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" /> Today's Tasks
           </h2>
           {totalToday === 0 ? (
@@ -66,7 +66,7 @@ export default function Dashboard() {
           ) : (
             <>
               <div className="flex items-center justify-between mb-3">
-                <span className="text-4xl font-display font-bold text-primary">{completionRate}%</span>
+                <span className="text-4xl font-bold text-primary">{completionRate}%</span>
                 <span className="text-sm text-muted-foreground">{completedToday}/{totalToday} done</span>
               </div>
               <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
@@ -84,7 +84,7 @@ export default function Dashboard() {
           )}
         </div>
         <div className="glass-card p-6">
-          <h2 className="font-display font-bold text-lg mb-4">🏆 Recent Achievements</h2>
+          <h2 className="mb-4">🏆 Recent Achievements</h2>
           {unlockedAchievements.length === 0 ? (
             <p className="text-muted-foreground text-sm">Complete tasks to unlock achievements!</p>
           ) : (
@@ -115,7 +115,7 @@ function StatCard({ icon, label, value, gradient }: { icon: React.ReactNode; lab
       <div className={`w-10 h-10 rounded-xl ${gradient} flex items-center justify-center text-primary-foreground shrink-0`}>{icon}</div>
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-display font-bold text-lg leading-tight tabular-nums">{display}</p>
+        <p className="font-semibold leading-tight tabular-nums">{display}</p>
       </div>
     </div>
   );

@@ -44,7 +44,7 @@ export function QuickCapture() {
     <Dialog open={state.isOpen} onOpenChange={(open) => { if (!open) close(); }}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-display flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" /> Quick add
           </DialogTitle>
         </DialogHeader>

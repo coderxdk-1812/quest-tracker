@@ -30,7 +30,7 @@ export function QuestMark({ size = 40, className, spin = false }: QuestMarkProps
         />
       </svg>
       <div
-        className="rounded-xl xp-gradient flex items-center justify-center text-primary-foreground font-display font-bold shrink-0"
+        className="rounded-xl xp-gradient flex items-center justify-center text-primary-foreground font-bold shrink-0"
         style={{ width: size * 0.8, height: size * 0.8, fontSize: size * 0.4 }}
       >
         Q

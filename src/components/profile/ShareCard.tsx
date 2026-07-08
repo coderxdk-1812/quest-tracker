@@ -89,13 +89,13 @@ export function ShareCard() {
     <div className="glass-card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Share2 className="h-5 w-5 text-primary" />
-        <h2 className="font-display font-bold text-lg">Show off your progress</h2>
+        <h2 className="">Show off your progress</h2>
       </div>
 
       {/* Visual preview (mirrors the downloadable SVG) */}
       <div className="rounded-xl p-5 mb-4" style={{ background: '#0e1116', borderTop: `4px solid ${accent}` }}>
         <p className="text-[11px] tracking-[2px] text-gray-500 font-bold">LEVEL UP QUEST</p>
-        <p className="text-2xl font-display font-extrabold text-white mt-1 truncate">{displayName}</p>
+        <p className="text-2xl font-extrabold text-white mt-1 truncate">{displayName}</p>
         <div className="mt-2"><RankBadge level={state.level} size="md" /></div>
         <div className="grid grid-cols-4 gap-2 mt-4 text-center">
           {[
