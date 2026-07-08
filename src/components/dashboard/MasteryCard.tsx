@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { TrendingUp } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
 import { subjectMastery } from '@/lib/motivation';
+import { GlowCard } from '@/components/GlowCard';
 
 export function MasteryCard() {
   const { state } = useGame();
   const mastery = useMemo(() => subjectMastery(state.tasks), [state.tasks]);
   if (mastery.length === 0) return null;
   return (
-    <div className="glass-card p-5">
+    <GlowCard className="p-5" glowHsl="var(--level-purple)">
       <h2 className="font-display font-bold text-lg mb-1 flex items-center gap-2">
         <TrendingUp className="h-5 w-5 text-primary" /> Mastery
       </h2>
@@ -27,7 +28,7 @@ export function MasteryCard() {
           </motion.div>
         ))}
       </div>
-    </div>
+    </GlowCard>
   );
 }
 

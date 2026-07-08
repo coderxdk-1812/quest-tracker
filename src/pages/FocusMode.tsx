@@ -3,6 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, Coffee, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Magnetic } from '@/components/Magnetic';
 
 type Mode = 'focus' | 'break';
 
@@ -196,13 +197,15 @@ export default function FocusMode() {
         <Button variant="outline" size="icon" onClick={reset} className="h-12 w-12 rounded-full">
           <RotateCcw className="h-5 w-5" />
         </Button>
-        <Button
-          onClick={() => { stopAlarm(); setIsRunning(!isRunning); }}
-          className="h-14 w-14 rounded-full text-lg"
-          size="icon"
-        >
-          {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
-        </Button>
+        <Magnetic className="rounded-full">
+          <Button
+            onClick={() => { stopAlarm(); setIsRunning(!isRunning); }}
+            className="h-14 w-14 rounded-full text-lg"
+            size="icon"
+          >
+            {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+          </Button>
+        </Magnetic>
         <Button
           variant="outline"
           size="icon"
