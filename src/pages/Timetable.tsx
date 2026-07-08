@@ -185,7 +185,7 @@ export default function Timetable() {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-display font-bold">Timetable 📅</h1>
+          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Timetable 📅</h1>
           <p className="text-muted-foreground text-sm mt-1">
             {view === 'week'
               ? `Week of ${format(startOfWeek(anchor, { weekStartsOn: 1 }), 'MMM d, yyyy')}`

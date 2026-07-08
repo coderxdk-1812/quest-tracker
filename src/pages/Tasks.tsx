@@ -233,7 +233,7 @@ export default function Tasks() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-display font-bold">Tasks ✅</h1>
+          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Tasks ✅</h1>
           <p className="text-muted-foreground text-sm mt-1">Plan, prioritise and crush your assignments.</p>
         </div>
         <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />New Task</Button>

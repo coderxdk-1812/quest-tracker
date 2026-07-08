@@ -29,15 +29,10 @@ export default function Dashboard() {
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl mx-auto space-y-6">
-      <motion.div variants={item}>
-        <h1 className="text-3xl font-display font-bold text-foreground">Welcome back! 👋</h1>
-        <p className="text-muted-foreground text-sm mt-1">Let's crush some tasks today.</p>
-      </motion.div>
-
+      <motion.div variants={item}><ProgressionHud /></motion.div>
       <motion.div variants={item}><OnboardingChecklist /></motion.div>
       <motion.div variants={item}><StreakStatusBanner /></motion.div>
       <motion.div variants={item}><DailyCue /></motion.div>
-      <motion.div variants={item}><ProgressionHud /></motion.div>
       <motion.div variants={item}><NextMoveCard /></motion.div>
 
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4">

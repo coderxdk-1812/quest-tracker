@@ -157,7 +157,7 @@ export default function FocusMode() {
   return (
     <div className="max-w-lg mx-auto space-y-8 flex flex-col items-center pt-8">
       <div className="text-center">
-        <h1 className="text-3xl font-display font-bold">
+        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">
           {mode === 'focus' ? 'Focus Mode 🧠' : 'Break Time ☕'}
         </h1>
         <p className="text-muted-foreground text-sm mt-1">

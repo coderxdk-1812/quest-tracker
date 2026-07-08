@@ -179,7 +179,7 @@ export default function Shop() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold flex items-center gap-2">
+          <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
             <ShoppingBag className="h-8 w-8 text-primary" /> Shop
           </h1>
           <p className="text-muted-foreground text-sm mt-1">Spend coins on power-ups & themes. Earn badges through milestones!</p>

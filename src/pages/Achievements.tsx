@@ -19,7 +19,7 @@ export default function Achievements() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-display font-bold">Achievements 🏆</h1>
+        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight">Achievements 🏆</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {unlocked.length}/{state.achievements.length} unlocked
         </p>

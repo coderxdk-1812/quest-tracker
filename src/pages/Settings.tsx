@@ -141,7 +141,7 @@ export default function Settings() {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-display font-bold flex items-center gap-2">
+        <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight flex items-center gap-2">
           <SettingsIcon className="h-8 w-8 text-primary" /> Settings
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Manage your profile, appearance, and preferences.</p>
