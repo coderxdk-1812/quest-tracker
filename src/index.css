@@ -558,3 +558,9 @@ button { transition: transform 0.14s cubic-bezier(0.22,1,0.36,1); }
 @media (prefers-reduced-motion: no-preference) {
   .glow-card-blob { transition: opacity 0.5s ease; }
 }
+
+/* ─── QuestMark signature motif (loading screen spin) ────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .quest-mark-spin { animation: quest-mark-rotate 2.2s linear infinite; }
+}
+@keyframes quest-mark-rotate { to { transform: rotate(270deg); } }

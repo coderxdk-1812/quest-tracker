@@ -2,6 +2,7 @@ import { LayoutDashboard, Calendar, CheckSquare, Target, Trophy, ShoppingBag, Us
 import { NavLink } from '@/components/NavLink';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
+import { QuestMark } from '@/components/QuestMark';
 import {
   Sidebar,
   SidebarContent,
@@ -36,9 +37,7 @@ export function AppSidebar() {
       <SidebarContent>
         <div className={`p-4 ${collapsed ? 'px-2' : ''}`}>
           <div className="flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl xp-gradient flex items-center justify-center text-primary-foreground font-display font-bold text-lg shrink-0">
-              Q
-            </div>
+            <QuestMark size={40} />
             {!collapsed && (
               <span className="font-display font-bold text-xl text-foreground">Questify</span>
             )}

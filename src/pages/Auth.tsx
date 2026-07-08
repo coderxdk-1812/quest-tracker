@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { LogIn, UserPlus, Mail } from 'lucide-react';
+import { QuestMark } from '@/components/QuestMark';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -97,9 +98,7 @@ export default function Auth() {
       >
         {/* Logo */}
         <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl xp-gradient flex items-center justify-center text-primary-foreground font-display font-bold text-3xl mx-auto mb-4">
-            Q
-          </div>
+          <QuestMark size={64} className="mx-auto mb-4" />
           <h1 className="text-3xl font-display font-bold text-foreground">Questify</h1>
           <p className="text-muted-foreground mt-1">Level up your productivity 🎮</p>
         </div>

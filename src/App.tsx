@@ -8,6 +8,7 @@ import { GameProvider } from "@/context/GameContext";
 import { QuickCaptureProvider } from "@/context/QuickCaptureContext";
 import { TaskCompleteFxProvider } from "@/context/TaskCompleteFxContext";
 import { AppLayout } from "@/components/AppLayout";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import Dashboard from "./pages/Dashboard";
 import Timetable from "./pages/Timetable";
 import Tasks from "./pages/Tasks";
@@ -25,18 +26,7 @@ const queryClient = new QueryClient();
 function ProtectedRoutes() {
   const { session, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl xp-gradient flex items-center justify-center text-primary-foreground font-display font-bold text-3xl mx-auto mb-4 animate-pulse">
-            Q
-          </div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingScreen />;
 
   if (!session) return <Navigate to="/auth" replace />;
 
