@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,7 +16,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 14%;
 
-    --primary: 145 63% 42%;
+    --primary: 252 65% 55%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 14% 92%;
@@ -25,20 +25,20 @@
     --muted: 220 14% 95%;
     --muted-foreground: 220 10% 46%;
 
-    --accent: 28 100% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 51%;
+    --accent-foreground: 32 40% 14%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 14% 90%;
     --input: 220 14% 90%;
-    --ring: 145 63% 42%;
+    --ring: 252 65% 55%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --xp-bar: 145 63% 42%;
+    --xp-bar: 252 65% 55%;
     --streak-fire: 28 100% 58%;
     --coin-gold: 45 100% 51%;
     --level-purple: 265 70% 58%;
@@ -58,15 +58,16 @@
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 220 20% 14%;
-    --sidebar-primary: 145 63% 42%;
+    --sidebar-primary: 252 65% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 145 63% 95%;
-    --sidebar-accent-foreground: 145 63% 30%;
+    --sidebar-accent: 252 65% 95%;
+    --sidebar-accent-foreground: 252 65% 32%;
     --sidebar-border: 220 14% 92%;
-    --sidebar-ring: 145 63% 42%;
+    --sidebar-ring: 252 65% 55%;
 
     --font-display: 'Playfair Display', serif;
     --font-body: 'Lora', serif;
+    --font-ui: 'Inter', sans-serif;
   }
 
   /* ─── Midnight theme (intrinsically dark — purple) ───────────────────── */
@@ -233,27 +234,27 @@
     --card-foreground: 230 15% 92%;
     --popover: 240 22% 10%;
     --popover-foreground: 230 15% 92%;
-    --primary: 145 63% 42%;
+    --primary: 252 66% 60%;
     --primary-foreground: 0 0% 100%;
     --secondary: 240 18% 16%;
     --secondary-foreground: 230 15% 88%;
     --muted: 240 18% 13%;
     --muted-foreground: 230 10% 55%;
-    --accent: 28 100% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 96% 56%;
+    --accent-foreground: 32 45% 12%;
     --destructive: 0 80% 58%;
     --destructive-foreground: 0 0% 100%;
     --border: 240 18% 18%;
     --input: 240 18% 18%;
-    --ring: 145 63% 42%;
+    --ring: 252 66% 60%;
     --sidebar-background: 240 25% 8%;
     --sidebar-foreground: 230 15% 88%;
-    --sidebar-primary: 145 63% 42%;
+    --sidebar-primary: 252 66% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 145 63% 16%;
-    --sidebar-accent-foreground: 145 63% 75%;
+    --sidebar-accent: 252 45% 20%;
+    --sidebar-accent-foreground: 252 65% 82%;
     --sidebar-border: 240 18% 16%;
-    --sidebar-ring: 145 63% 42%;
+    --sidebar-ring: 252 66% 60%;
   }
 
   /* ═══════════════════════════════════════════════════════════════════════
@@ -443,7 +444,7 @@
     @apply bg-card/80 backdrop-blur-sm border border-border rounded-xl shadow-sm;
   }
   .xp-gradient {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(165 63% 50%));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(220 70% 60%));
   }
   .streak-gradient {
     background: linear-gradient(135deg, hsl(var(--streak-fire)), hsl(45 100% 55%));
