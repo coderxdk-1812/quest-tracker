@@ -21,7 +21,7 @@ export function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
-        <QuestMark size={64} spin className="mx-auto mb-4" />
+        <QuestMark size={64} className="mx-auto mb-4" />
         <p className="text-muted-foreground">{MESSAGES[i]}</p>
       </div>
     </div>

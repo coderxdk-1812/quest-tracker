@@ -5,7 +5,6 @@ import { Compass, ArrowRight, AlertTriangle, CalendarClock, BookOpen, Sparkles, 
 import { useGame } from '@/context/GameContext';
 import { recommendNextMove, type NMTask, type MoveKind } from '@/lib/nextMove';
 import { Button } from '@/components/ui/button';
-import { Magnetic } from '@/components/Magnetic';
 
 const KIND_ICON: Record<MoveKind, typeof Compass> = {
   overdue: AlertTriangle,
@@ -58,11 +57,9 @@ export function NextMoveCard() {
           </p>
           <h3 className="leading-tight mt-0.5">{move.title}</h3>
           <p className="text-sm text-muted-foreground mt-1">{move.reason}</p>
-          <Magnetic className="mt-3">
-            <Button size="sm" className="gap-1.5" onClick={() => navigate(move.route)}>
-              {move.cta} <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </Magnetic>
+          <Button size="sm" className="gap-1.5 mt-3" onClick={() => navigate(move.route)}>
+            {move.cta} <ArrowRight className="h-3.5 w-3.5" />
+          </Button>
         </div>
       </div>
     </motion.div>

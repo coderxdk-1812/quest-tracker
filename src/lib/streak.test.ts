@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getStreakStatus, isStreakSaveEvent, streakTier } from './streak';
+import { getStreakStatus, isStreakSaveEvent } from './streak';
 
 const now = new Date('2026-06-25T18:00:00');
 const k = (d: Date) => d.toISOString().split('T')[0];
@@ -35,18 +35,5 @@ describe('isStreakSaveEvent', () => {
   });
   it('is false when freezes are unchanged', () => {
     expect(isStreakSaveEvent(1, 1)).toBe(false);
-  });
-});
-
-describe('streakTier', () => {
-  it('matches milestones.ts streak tiers (3/7/30)', () => {
-    expect(streakTier(0)).toBe(0);
-    expect(streakTier(2)).toBe(0);
-    expect(streakTier(3)).toBe(1);
-    expect(streakTier(6)).toBe(1);
-    expect(streakTier(7)).toBe(2);
-    expect(streakTier(29)).toBe(2);
-    expect(streakTier(30)).toBe(3);
-    expect(streakTier(500)).toBe(3);
   });
 });

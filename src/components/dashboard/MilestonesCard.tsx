@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { Trophy, Check, Brain, Flame, Zap, type LucideIcon } from 'lucide-react';
 import { useGame } from '@/context/GameContext';
 import { nextMilestones, totalReached, computeMilestones, type MilestoneProgress } from '@/lib/milestones';
-import { GlowCard } from '@/components/GlowCard';
 
 const ICONS: Record<string, LucideIcon> = { check: Check, brain: Brain, flame: Flame, zap: Zap };
 
@@ -19,7 +18,7 @@ export function MilestonesCard() {
   const total = computeMilestones(stats).length;
 
   return (
-    <GlowCard className="p-5">
+    <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h2 className="flex items-center gap-2">
           <Trophy className="h-5 w-5 text-primary" /> Milestones
@@ -57,7 +56,7 @@ export function MilestonesCard() {
           </p>
         )}
       </div>
-    </GlowCard>
+    </div>
   );
 }
 

@@ -4,7 +4,6 @@ import { useGame } from '@/context/GameContext';
 import { getRank, rankProgress } from '@/lib/progression';
 import { LevelRing } from './LevelRing';
 import { rankIcon } from './RankBadge';
-import { HeroBlobBackground } from '@/components/dashboard/HeroBlobBackground';
 import { StreakFlame } from '@/components/StreakFlame';
 
 /**
@@ -21,11 +20,9 @@ export function ProgressionHud() {
   const NextIcon = rp.next ? rankIcon(rp.next) : null;
 
   return (
-    <div className="glass-card relative overflow-hidden rounded-2xl p-6 md:p-9">
-      <HeroBlobBackground />
-
+    <div className="glass-card relative rounded-2xl p-6 md:p-9">
       <div className="absolute top-5 right-6 md:right-8 flex items-center gap-1.5 text-sm font-bold text-streak">
-        <StreakFlame streak={state.streak} />
+        <StreakFlame />
         <span className="tabular-nums">{state.streak}</span>
       </div>
 

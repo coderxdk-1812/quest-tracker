@@ -59,7 +59,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </button>
               <ThemeSwitcher />
               <div className="flex items-center gap-1 text-sm font-medium">
-                <StreakFlame streak={state.streak} />
+                <StreakFlame />
                 <span className="text-streak font-bold tabular-nums">{streak}</span>
               </div>
               <div className="flex items-center gap-1 text-sm font-medium">

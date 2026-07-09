@@ -3,18 +3,15 @@ import { cn } from '@/lib/utils';
 interface QuestMarkProps {
   size?: number;
   className?: string;
-  /** Slow idle spin for the ring — used on the loading screen only, not persistent nav. */
-  spin?: boolean;
 }
 
 /**
- * Signature motif (spec: personality redesign) — the "Q" mark with a thin partial
- * ring around it, visually rhyming with LevelRing (the app's core progression
- * symbol) so the brand mark and the leveling-up mechanic read as one idea rather
- * than an arbitrary logo. Used consistently wherever the app identifies itself:
- * sidebar, loading screen, auth page. Not a mascot — just a quiet recurring shape.
+ * Signature motif — the "Q" mark with a barely-there partial ring around it,
+ * echoing LevelRing without calling attention to itself. Used consistently
+ * wherever the app identifies itself: sidebar, loading screen, auth page.
+ * Static — no spin, no pulse; personality here comes from the shape, not motion.
  */
-export function QuestMark({ size = 40, className, spin = false }: QuestMarkProps) {
+export function QuestMark({ size = 40, className }: QuestMarkProps) {
   const stroke = Math.max(2, Math.round(size * 0.055));
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -22,10 +19,10 @@ export function QuestMark({ size = 40, className, spin = false }: QuestMarkProps
 
   return (
     <div className={cn('relative shrink-0 inline-flex items-center justify-center', className)} style={{ width: size, height: size }}>
-      <svg width={size} height={size} className={cn('absolute inset-0 -rotate-90', spin && 'quest-mark-spin')}>
+      <svg width={size} height={size} className="absolute inset-0 -rotate-90">
         <circle
           cx={size / 2} cy={size / 2} r={r} fill="none"
-          stroke="hsl(var(--primary) / 0.3)" strokeWidth={stroke} strokeLinecap="round"
+          stroke="hsl(var(--primary) / 0.12)" strokeWidth={stroke} strokeLinecap="round"
           strokeDasharray={c} strokeDashoffset={c - arcPct * c}
         />
       </svg>
