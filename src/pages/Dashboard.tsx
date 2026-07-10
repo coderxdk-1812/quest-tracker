@@ -28,7 +28,7 @@ export default function Dashboard() {
   const unlockedAchievements = state.achievements.filter(a => a.unlockedAt);
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl mx-auto space-y-6">
+    <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl mx-auto space-y-8">
       <motion.div variants={item}><ProgressionHud /></motion.div>
       <motion.div variants={item}><OnboardingChecklist /></motion.div>
       <motion.div variants={item}><StreakStatusBanner /></motion.div>
@@ -42,18 +42,18 @@ export default function Dashboard() {
         <StatCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={unlockedAchievements.length} />
       </motion.div>
 
-      <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
+      <motion.div variants={item} className="grid md:grid-cols-2 gap-5">
         <TodaySchedule />
         <DailyQuests />
       </motion.div>
 
       <motion.div variants={item}><MasteryCard /></motion.div>
-      <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
+      <motion.div variants={item} className="grid md:grid-cols-2 gap-5">
         <MilestonesCard />
         <PerfectWeekCard />
       </motion.div>
 
-      <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
+      <motion.div variants={item} className="grid md:grid-cols-2 gap-5">
         <div className="glass-card p-6">
           <h2 className="mb-4 flex items-center gap-2">
             <CheckSquare className="h-5 w-5 text-primary" /> Today's Tasks

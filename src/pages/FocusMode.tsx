@@ -235,9 +235,9 @@ export default function FocusMode() {
         </motion.div>
       )}
 
-      <div className="glass-card p-4 w-full text-center">
+      <div className="text-center pt-2">
         <p className="text-sm text-muted-foreground">
-          Sessions completed today: <span className="font-bold text-primary">{sessionsCompleted}</span>
+          Sessions completed today: <span className="font-semibold text-foreground">{sessionsCompleted}</span>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
           {sessionsCompleted * 30} XP earned from focus sessions

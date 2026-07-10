@@ -22,19 +22,15 @@ export function DailyCue() {
   return (
     <AnimatePresence>
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-        className="glass-card p-4 border-l-4 border-l-primary">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
-            <Sparkles className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm">{title}</p>
-            <p className="text-xs text-muted-foreground">{message}</p>
-          </div>
-          <Button size="sm" className="gap-1 shrink-0" onClick={() => navigate('/tasks')}>
-            Quick win <ArrowRight className="h-3.5 w-3.5" />
-          </Button>
+        className="flex items-center gap-3 pl-4 border-l-2 border-l-primary py-1">
+        <Sparkles className="h-4 w-4 text-primary shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm">{title}</p>
+          <p className="text-xs text-muted-foreground">{message}</p>
         </div>
+        <Button size="sm" variant="ghost" className="gap-1 shrink-0" onClick={() => navigate('/tasks')}>
+          Quick win <ArrowRight className="h-3.5 w-3.5" />
+        </Button>
       </motion.div>
     </AnimatePresence>
   );
