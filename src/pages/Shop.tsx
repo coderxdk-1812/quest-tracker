@@ -23,6 +23,9 @@ const TIER_META: Record<ShopTier, { label: string; blurb: string }> = {
   consumable: { label: 'Consumables',    blurb: 'Cheap, one-shot helpers.' },
   powerup:    { label: 'Power-Ups',      blurb: 'Meaningful boosts for a study session.' },
   premium:    { label: 'Premium',        blurb: 'Save toward these — big impact.' },
+  common:     { label: 'Common',         blurb: 'Simple, comfortable palettes.' },
+  signature:  { label: 'Signature',      blurb: 'Distinct looks worth showing off.' },
+  prestige:   { label: 'Prestige',       blurb: 'The rarest, most striking looks.' },
 };
 
 const MYSTERY_PRICE = 120;
@@ -345,33 +348,56 @@ export default function Shop() {
 
         if (activeCategory === 'theme') {
           const isDefaultActive = state.activeTheme === 'default';
+          const themeTierOrder: ShopTier[] = ['common', 'signature', 'premium', 'prestige'];
           return (
-            <motion.div key="theme" variants={container} initial="hidden" animate="show" className="space-y-4">
+            <motion.div key="theme" variants={container} initial="hidden" animate="show" className="space-y-6">
               <p className="text-sm text-muted-foreground">Aspirational cosmetics — save up and treat yourself.</p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <motion.div
-                  key="theme_default" variants={item} whileHover={{ scale: 1.02 }}
-                  className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow ${isDefaultActive ? 'ring-2 ring-primary' : 'ring-1 ring-primary/20'}`}
-                >
-                  {isDefaultActive && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
-                  <div className="flex items-start gap-3">
-                    <span className="text-3xl">✨</span>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="">Default</h3>
-                      <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
+
+              <motion.div
+                variants={item} whileHover={{ scale: 1.02 }}
+                className={`glass-card p-5 flex flex-col gap-3 relative overflow-hidden transition-shadow max-w-sm ${isDefaultActive ? 'ring-2 ring-primary' : 'ring-1 ring-primary/20'}`}
+              >
+                {isDefaultActive && <div className="absolute top-3 right-3"><Check className="h-5 w-5 text-primary" /></div>}
+                <div className="flex items-start gap-3">
+                  <span className="text-3xl">✨</span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="">Zenith</h3>
+                    <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
+                  </div>
+                </div>
+                <div className="mt-auto flex items-center justify-between">
+                  <span className="text-xs text-primary font-medium">Free</span>
+                  <Button size="sm" variant={isDefaultActive ? 'secondary' : 'outline'} disabled={isDefaultActive}
+                    onClick={() => { dispatch({ type: 'SET_THEME', themeId: 'default' }); toast.success('Zenith theme activated! ✨'); }}
+                    className="ml-auto">
+                    {isDefaultActive ? 'Active' : 'Equip'}
+                  </Button>
+                </div>
+              </motion.div>
+
+              {themeTierOrder.map(tier => {
+                const items = filteredItems.filter(i => i.tier === tier);
+                if (items.length === 0) return null;
+                const meta = TIER_META[tier];
+                const minPrice = Math.min(...items.map(i => i.price));
+                const maxPrice = Math.max(...items.map(i => i.price));
+                return (
+                  <div key={tier} className="space-y-3">
+                    <div className="flex items-baseline justify-between">
+                      <div>
+                        <h2 className="">{meta.label}</h2>
+                        <p className="text-xs text-muted-foreground">{meta.blurb}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground font-medium tabular-nums">
+                        {minPrice === maxPrice ? `${minPrice}🪙` : `${minPrice}–${maxPrice}🪙`}
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {items.map(renderCard)}
                     </div>
                   </div>
-                  <div className="mt-auto flex items-center justify-between">
-                    <span className="text-xs text-primary font-medium">Free</span>
-                    <Button size="sm" variant={isDefaultActive ? 'secondary' : 'outline'} disabled={isDefaultActive}
-                      onClick={() => { dispatch({ type: 'SET_THEME', themeId: 'default' }); toast.success('Default theme activated! ✨'); }}
-                      className="ml-auto">
-                      {isDefaultActive ? 'Active' : 'Equip'}
-                    </Button>
-                  </div>
-                </motion.div>
-                {filteredItems.map(renderCard)}
-              </div>
+                );
+              })}
             </motion.div>
           );
         }

@@ -18,14 +18,23 @@ import type { ThemeId } from '@/context/GameContext';
 import { springReveal } from '@/lib/motion';
 import { prefersReducedMotion } from '@/lib/utils';
 
-// All available themes with display metadata
+// All available themes with display metadata. Swatch is each theme's real light-mode --primary.
 const THEME_META: { id: ThemeId; name: string; icon: string; swatch: string }[] = [
-  { id: 'default',  name: 'Default',   icon: '✨', swatch: 'hsl(145 63% 42%)' },
-  { id: 'midnight', name: 'Midnight',  icon: '🌙', swatch: 'hsl(265 70% 58%)' },
-  { id: 'sakura',   name: 'Sakura',    icon: '🌸', swatch: 'hsl(340 70% 60%)' },
-  { id: 'ocean',    name: 'Ocean',     icon: '🌊', swatch: 'hsl(195 80% 50%)' },
-  { id: 'neon',     name: 'Neon Glow', icon: '💜', swatch: 'hsl(280 100% 65%)' },
-  { id: 'sunset',   name: 'Sunset',    icon: '🌅', swatch: 'hsl(15 85% 55%)' },
+  { id: 'default',   name: 'Zenith',    icon: '✨', swatch: 'hsl(252 65% 55%)' },
+  { id: 'graphite',  name: 'Graphite',  icon: '🪨', swatch: 'hsl(220 18% 38%)' },
+  { id: 'matcha',    name: 'Matcha',    icon: '🍵', swatch: 'hsl(130 40% 38%)' },
+  { id: 'lavender',  name: 'Lavender',  icon: '🪻', swatch: 'hsl(265 45% 58%)' },
+  { id: 'ocean',     name: 'Ocean',     icon: '🌊', swatch: 'hsl(195 80% 42%)' },
+  { id: 'forest',    name: 'Forest',    icon: '🌲', swatch: 'hsl(150 55% 34%)' },
+  { id: 'sunset',    name: 'Sunset',    icon: '🌅', swatch: 'hsl(15 85% 55%)' },
+  { id: 'twilight',  name: 'Twilight',  icon: '🌆', swatch: 'hsl(235 62% 50%)' },
+  { id: 'rose',      name: 'Rosé',      icon: '🥂', swatch: 'hsl(350 62% 56%)' },
+  { id: 'midnight',  name: 'Midnight',  icon: '🌙', swatch: 'hsl(265 65% 55%)' },
+  { id: 'sakura',    name: 'Sakura',    icon: '🌸', swatch: 'hsl(340 70% 60%)' },
+  { id: 'ember',     name: 'Ember',     icon: '🔥', swatch: 'hsl(5 75% 46%)' },
+  { id: 'solstice',  name: 'Solstice',  icon: '☀️', swatch: 'hsl(40 90% 48%)' },
+  { id: 'neon',      name: 'Neon Glow', icon: '💜', swatch: 'hsl(280 90% 58%)' },
+  { id: 'aurora',    name: 'Aurora',    icon: '🌌', swatch: 'hsl(170 65% 36%)' },
 ];
 
 const DELETE_PHRASE = 'delete my account';

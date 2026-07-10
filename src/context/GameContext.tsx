@@ -8,7 +8,9 @@ import { computeNextOccurrenceDeadline, isRecurrenceDue, type TaskRecurrence } f
 // Types
 export type Priority = 'easy' | 'medium' | 'hard';
 export type SubjectColor = 'math' | 'physics' | 'chemistry' | 'english' | 'history' | 'art' | 'music' | 'other';
-export type ThemeId = 'default' | 'midnight' | 'sakura' | 'ocean' | 'neon' | 'sunset';
+export type ThemeId =
+  | 'default' | 'midnight' | 'sakura' | 'ocean' | 'neon' | 'sunset'
+  | 'forest' | 'lavender' | 'ember' | 'aurora' | 'graphite' | 'solstice' | 'twilight' | 'rose' | 'matcha';
 
 export interface Subtask {
   id: string;
@@ -58,7 +60,7 @@ export interface Achievement {
   unlockedAt?: string;
 }
 
-export type ShopTier = 'consumable' | 'powerup' | 'premium';
+export type ShopTier = 'consumable' | 'powerup' | 'premium' | 'common' | 'signature' | 'prestige';
 
 export interface ShopItem {
   id: string;
@@ -206,12 +208,27 @@ export const SHOP_ITEMS: ShopItem[] = [
   // --- Premium (aspirational, save-toward) ---
   { id: 'xp_mega', name: 'XP Mega Boost', description: 'Triple XP for the next 10 tasks!', icon: '🔮', price: 400, category: 'powerup', tier: 'premium' },
 
-  // --- Themes ---
-  { id: 'theme_midnight', name: 'Midnight', description: 'Deep dark purple with light mode variant', icon: '🌙', price: 200, category: 'theme', oneTime: true },
-  { id: 'theme_sakura', name: 'Sakura', description: 'Cherry blossom pink — light and dark modes', icon: '🌸', price: 200, category: 'theme', oneTime: true },
-  { id: 'theme_ocean', name: 'Ocean', description: 'Deep-sea blue — light and dark modes', icon: '🌊', price: 200, category: 'theme', oneTime: true },
-  { id: 'theme_sunset', name: 'Sunset', description: 'Warm orange coral — light and dark modes', icon: '🌅', price: 250, category: 'theme', oneTime: true },
-  { id: 'theme_neon', name: 'Neon Glow', description: 'Cyberpunk electric — light and dark modes', icon: '💜', price: 350, category: 'theme', oneTime: true },
+  // --- Themes: Common ---
+  { id: 'theme_graphite', name: 'Graphite', description: 'Cool neutral slate — light and dark modes', icon: '🪨', price: 150, category: 'theme', tier: 'common', oneTime: true },
+  { id: 'theme_matcha', name: 'Matcha', description: 'Soft matcha green — light and dark modes', icon: '🍵', price: 150, category: 'theme', tier: 'common', oneTime: true },
+  { id: 'theme_lavender', name: 'Lavender', description: 'Soft pastel purple — light and dark modes', icon: '🪻', price: 150, category: 'theme', tier: 'common', oneTime: true },
+
+  // --- Themes: Signature ---
+  { id: 'theme_ocean', name: 'Ocean', description: 'Deep-sea blue — light and dark modes', icon: '🌊', price: 450, category: 'theme', tier: 'signature', oneTime: true },
+  { id: 'theme_forest', name: 'Forest', description: 'Deep evergreen — light and dark modes', icon: '🌲', price: 450, category: 'theme', tier: 'signature', oneTime: true },
+  { id: 'theme_sunset', name: 'Sunset', description: 'Warm orange coral — light and dark modes', icon: '🌅', price: 450, category: 'theme', tier: 'signature', oneTime: true },
+  { id: 'theme_twilight', name: 'Twilight', description: 'Indigo blue dusk — light and dark modes', icon: '🌆', price: 450, category: 'theme', tier: 'signature', oneTime: true },
+  { id: 'theme_rose', name: 'Rosé', description: 'Warm rose pink — light and dark modes', icon: '🥂', price: 450, category: 'theme', tier: 'signature', oneTime: true },
+
+  // --- Themes: Premium ---
+  { id: 'theme_midnight', name: 'Midnight', description: 'Deep midnight purple — light and dark modes', icon: '🌙', price: 850, category: 'theme', tier: 'premium', oneTime: true },
+  { id: 'theme_sakura', name: 'Sakura', description: 'Cherry blossom pink — light and dark modes', icon: '🌸', price: 850, category: 'theme', tier: 'premium', oneTime: true },
+  { id: 'theme_ember', name: 'Ember', description: 'Smoldering crimson — light and dark modes', icon: '🔥', price: 850, category: 'theme', tier: 'premium', oneTime: true },
+  { id: 'theme_solstice', name: 'Solstice', description: 'Radiant gold — light and dark modes', icon: '☀️', price: 850, category: 'theme', tier: 'premium', oneTime: true },
+
+  // --- Themes: Prestige ---
+  { id: 'theme_neon', name: 'Neon Glow', description: 'Cyberpunk electric violet — light and dark modes', icon: '💜', price: 1500, category: 'theme', tier: 'prestige', oneTime: true },
+  { id: 'theme_aurora', name: 'Aurora', description: 'Teal, green & violet borealis — light and dark modes', icon: '🌌', price: 1500, category: 'theme', tier: 'prestige', oneTime: true },
 ];
 
 
