@@ -15,8 +15,11 @@ import { TaskCompleteFx } from '@/components/TaskCompleteFx';
 import { LevelUpCelebration } from '@/components/progression/LevelUpCelebration';
 import { StreakFlame } from '@/components/StreakFlame';
 import { StreakSavedMoment } from '@/components/StreakSavedMoment';
+import { Magnetic } from '@/components/motion/Magnetic';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { useCountUp } from '@/hooks/useCountUp';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const { state, dispatch } = useGame();
@@ -42,14 +45,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
           <header className="h-14 flex items-center justify-between border-b border-border px-4">
             <SidebarTrigger />
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => openQuickCapture()}
-                className="p-1.5 rounded-lg hover:bg-muted hover:scale-110 transition-all"
-                title="Quick add task"
-                aria-label="Quick add task"
-              >
-                <Plus className="h-5 w-5 text-primary" />
-              </button>
+              <Magnetic strength={8}>
+                <button
+                  onClick={() => openQuickCapture()}
+                  className="p-1.5 rounded-lg hover:bg-muted transition-colors"
+                  title="Quick add task"
+                  aria-label="Quick add task"
+                >
+                  <Plus className="h-5 w-5 text-primary" />
+                </button>
+              </Magnetic>
               <button
                 onClick={() => dispatch({ type: 'SET_DARK_MODE', enabled: !state.darkMode })}
                 className="text-xl hover:scale-110 transition-transform"
@@ -78,10 +83,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                initial={prefersReducedMotion() ? { opacity: 0 } : { opacity: 0, y: 14, scale: 0.985 }}
+                animate={prefersReducedMotion() ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                exit={prefersReducedMotion() ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.985 }}
+                transition={prefersReducedMotion() ? { duration: 0.15 } : springReveal}
               >
                 {children}
               </motion.div>
