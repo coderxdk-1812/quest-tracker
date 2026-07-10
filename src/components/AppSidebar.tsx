@@ -2,7 +2,8 @@ import { LayoutDashboard, Calendar, CheckSquare, Target, Trophy, ShoppingBag, Us
 import { NavLink } from '@/components/NavLink';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
-import { QuestMark } from '@/components/QuestMark';
+import { ZenithWordmark } from '@/components/ZenithWordmark';
+import zenithLogo from '@/assets/zenith-logo.svg';
 import {
   Sidebar,
   SidebarContent,
@@ -37,9 +38,12 @@ export function AppSidebar() {
       <SidebarContent>
         <div className={`p-4 ${collapsed ? 'px-2' : ''}`}>
           <div className="flex items-center gap-2 mb-6">
-            <QuestMark size={40} />
-            {!collapsed && (
-              <span className="font-display font-bold text-xl text-foreground">Questify</span>
+            {collapsed ? (
+              <img src={zenithLogo} alt="Zenith" width={32} height={32} />
+            ) : (
+              <div className="text-foreground">
+                <ZenithWordmark height={36} />
+              </div>
             )}
           </div>
 

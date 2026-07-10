@@ -362,7 +362,7 @@ export default function Shop() {
                   <span className="text-3xl">✨</span>
                   <div className="flex-1 min-w-0">
                     <h3 className="">Zenith</h3>
-                    <p className="text-sm text-muted-foreground">The classic Questify look — light & dark modes included</p>
+                    <p className="text-sm text-muted-foreground">The classic Zenith look — light & dark modes included</p>
                   </div>
                 </div>
                 <div className="mt-auto flex items-center justify-between">

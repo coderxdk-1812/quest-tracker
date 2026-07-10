@@ -20,7 +20,7 @@ import { prefersReducedMotion } from '@/lib/utils';
 
 // All available themes with display metadata. Swatch is each theme's real light-mode --primary.
 const THEME_META: { id: ThemeId; name: string; icon: string; swatch: string }[] = [
-  { id: 'default',   name: 'Zenith',    icon: '✨', swatch: 'hsl(252 65% 55%)' },
+  { id: 'default',   name: 'Zenith',    icon: '✨', swatch: 'hsl(243 75% 59%)' },
   { id: 'graphite',  name: 'Graphite',  icon: '🪨', swatch: 'hsl(220 18% 38%)' },
   { id: 'matcha',    name: 'Matcha',    icon: '🍵', swatch: 'hsl(130 40% 38%)' },
   { id: 'lavender',  name: 'Lavender',  icon: '🪻', swatch: 'hsl(265 45% 58%)' },
@@ -280,7 +280,7 @@ export default function Settings() {
             <div className="pr-4">
               <p className="font-medium">Enable notifications</p>
               <p className="text-sm text-muted-foreground">
-                Get desktop reminders — even when Questify's tab is closed.
+                Get desktop reminders — even when Zenith's tab is closed.
                 {!pushSupported && ' (Not supported in this browser.)'}
               </p>
             </div>

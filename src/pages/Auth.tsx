@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { LogIn, UserPlus, Mail } from 'lucide-react';
-import { QuestMark } from '@/components/QuestMark';
+import { ZenithWordmark } from '@/components/ZenithWordmark';
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -67,7 +67,7 @@ export default function Auth() {
           },
         });
         if (error) throw error;
-        toast.success('Account created! Welcome to Questify! 🚀');
+        toast.success('Account created! Welcome to Zenith! 🚀');
       }
     } catch (err: any) {
       toast.error(err.message || 'Authentication failed');
@@ -98,8 +98,9 @@ export default function Auth() {
       >
         {/* Logo */}
         <div className="text-center">
-          <QuestMark size={64} className="mx-auto mb-4" />
-          <h1 className="text-3xl font-display font-bold text-foreground">Questify</h1>
+          <div className="inline-block text-foreground mb-4">
+            <ZenithWordmark height={56} />
+          </div>
           <p className="text-muted-foreground mt-1">Level up your productivity 🎮</p>
         </div>
 

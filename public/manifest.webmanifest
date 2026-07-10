@@ -1,0 +1,17 @@
+{
+  "name": "Zenith",
+  "short_name": "Zenith",
+  "description": "Zenith is a gamified study app that helps students break down assignments and track progress.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/zenith-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

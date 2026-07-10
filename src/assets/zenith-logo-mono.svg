@@ -1,0 +1,7 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zenith">
+  <path d="M120 380 L256 188 L392 380" fill="none" stroke="currentColor"
+        stroke-width="50" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M192 380 L256 286 L320 380" fill="none" stroke="currentColor" stroke-opacity="0.4"
+        stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 64 Q268 108 312 120 Q268 132 256 176 Q244 132 200 120 Q244 108 256 64 Z" fill="currentColor"/>
+</svg>

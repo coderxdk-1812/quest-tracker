@@ -77,9 +77,9 @@ export async function enableWebPush(userId: string): Promise<{ ok: boolean; erro
     // Immediate local confirmation notification so user knows it works
     try {
       await reg.showNotification('Notifications on ✅', {
-        body: 'Questify will nudge you at the right moments — never spam.',
-        icon: '/placeholder.svg',
-        badge: '/placeholder.svg',
+        body: 'Zenith will nudge you at the right moments — never spam.',
+        icon: '/zenith-logo.svg',
+        badge: '/zenith-logo.svg',
         tag: 'questify-test',
       });
     } catch {}

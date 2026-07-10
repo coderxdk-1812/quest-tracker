@@ -8,6 +8,7 @@ import { totalReached } from '@/lib/milestones';
 import { buildShareText, buildShareSvg, type ShareStats } from '@/lib/shareCard';
 import { RankBadge } from '@/components/progression/RankBadge';
 import { Button } from '@/components/ui/button';
+import { ZenithMonoMark } from '@/components/ZenithMonoMark';
 
 /**
  * Public, shareable accomplishment card (spec §6). Designed to be proud of and posted
@@ -73,7 +74,7 @@ export function ShareCard() {
       const pngUrl = URL.createObjectURL(pngBlob);
       const a = document.createElement('a');
       a.href = pngUrl;
-      a.download = `level-up-quest-${displayName.toLowerCase().replace(/\s+/g, '-')}.png`;
+      a.download = `zenith-${displayName.toLowerCase().replace(/\s+/g, '-')}.png`;
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(pngUrl);
       toast.success('Card downloaded!');
@@ -94,7 +95,10 @@ export function ShareCard() {
 
       {/* Visual preview (mirrors the downloadable SVG) */}
       <div className="rounded-xl p-5 mb-4" style={{ background: '#0e1116', borderTop: `4px solid ${accent}` }}>
-        <p className="text-[11px] tracking-[2px] text-gray-500 font-bold">LEVEL UP QUEST</p>
+        <div className="flex items-center gap-1.5 text-gray-500">
+          <ZenithMonoMark size={14} />
+          <p className="text-[11px] tracking-[2px] font-bold">ZENITH</p>
+        </div>
         <p className="text-2xl font-extrabold text-white mt-1 truncate">{displayName}</p>
         <div className="mt-2"><RankBadge level={state.level} size="md" /></div>
         <div className="grid grid-cols-4 gap-2 mt-4 text-center">

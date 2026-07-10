@@ -1,4 +1,4 @@
-# Level Up Quest
+# Zenith
 
 A gamified study & task-management app for students — XP, levels, coins, streaks, a shop,
 achievements, a focus mode, a timetable, friends/leaderboard, and **personalised daily

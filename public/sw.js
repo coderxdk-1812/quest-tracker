@@ -1,4 +1,4 @@
-/* Questify Web Push service worker */
+/* Zenith Web Push service worker */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -12,14 +12,14 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch {
-    data = { title: 'Questify', body: event.data ? event.data.text() : '' };
+    data = { title: 'Zenith', body: event.data ? event.data.text() : '' };
   }
 
-  const title = data.title || 'Questify';
+  const title = data.title || 'Zenith';
   const options = {
     body: data.body || '',
-    icon: data.icon || '/placeholder.svg',
-    badge: data.badge || '/placeholder.svg',
+    icon: data.icon || '/zenith-logo.svg',
+    badge: data.badge || '/zenith-logo.svg',
     tag: data.tag || undefined,
     data: {
       url: data.url || '/',
