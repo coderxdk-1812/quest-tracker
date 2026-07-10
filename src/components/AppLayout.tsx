@@ -58,19 +58,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 {state.darkMode ? '☀️' : '🌙'}
               </button>
               <ThemeSwitcher />
-              <div className="flex items-center gap-1 text-sm font-medium">
+              <div className="flex items-center gap-1 text-sm font-medium text-foreground">
                 <StreakFlame />
-                <span className="text-streak font-bold tabular-nums">{streak}</span>
+                <span className="font-bold tabular-nums">{streak}</span>
               </div>
-              <div className="flex items-center gap-1 text-sm font-medium">
+              <div className="flex items-center gap-1 text-sm font-medium text-foreground">
                 <span className="text-lg">🪙</span>
-                <span className="text-coin font-bold tabular-nums">{coins}</span>
+                <span className="font-bold tabular-nums">{coins}</span>
               </div>
               <div
                 ref={(el) => { hudTargetRef.current = el; }}
-                className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm font-bold"
+                className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-sm font-bold text-foreground"
               >
-                <span className="text-level tabular-nums">Lv.{level}</span>
+                <span className="tabular-nums">Lv.{level}</span>
               </div>
             </div>
           </header>

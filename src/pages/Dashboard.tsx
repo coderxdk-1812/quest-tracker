@@ -36,10 +36,10 @@ export default function Dashboard() {
       <motion.div variants={item}><NextMoveCard /></motion.div>
 
       <motion.div variants={item} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={<Coins className="h-5 w-5" />} label="Coins" value={state.coins} gradient="coin-gradient" />
-        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="Tasks Done" value={state.totalTasksCompleted} gradient="xp-gradient" />
-        <StatCard icon={<Brain className="h-5 w-5" />} label="Focus Sessions" value={state.focusSessionsCompleted} gradient="level-gradient" />
-        <StatCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={unlockedAchievements.length} gradient="streak-gradient" />
+        <StatCard icon={<Coins className="h-5 w-5" />} label="Coins" value={state.coins} />
+        <StatCard icon={<TrendingUp className="h-5 w-5" />} label="Tasks Done" value={state.totalTasksCompleted} />
+        <StatCard icon={<Brain className="h-5 w-5" />} label="Focus Sessions" value={state.focusSessionsCompleted} />
+        <StatCard icon={<Trophy className="h-5 w-5" />} label="Achievements" value={unlockedAchievements.length} />
       </motion.div>
 
       <motion.div variants={item} className="grid md:grid-cols-2 gap-4">
@@ -108,11 +108,11 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ icon, label, value, gradient }: { icon: React.ReactNode; label: string; value: number; gradient: string; }) {
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number; }) {
   const display = useCountUp(value);
   return (
     <div className="glass-card p-4 flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl ${gradient} flex items-center justify-center text-primary-foreground shrink-0`}>{icon}</div>
+      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-foreground shrink-0">{icon}</div>
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>
         <p className="font-semibold leading-tight tabular-nums">{display}</p>
