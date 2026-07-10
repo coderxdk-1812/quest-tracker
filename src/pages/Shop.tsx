@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import { AvatarsTab } from '@/components/shop/AvatarsTab';
 import { useCountUp } from '@/hooks/useCountUp';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 const CATEGORIES = [
   { id: 'powerup' as const,  label: 'Power-Ups', icon: Zap },
@@ -51,15 +53,6 @@ function rollMysteryBox(): MysteryReward {
 }
 
 
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-};
-const item = {
-  hidden: { opacity: 0, y: 15, scale: 0.95 },
-  show: { opacity: 1, y: 0, scale: 1 },
-};
-
 function formatTimeLeft(expiresAt: string): string {
   const ms = new Date(expiresAt).getTime() - Date.now();
   if (ms <= 0) return 'Expired';
@@ -81,6 +74,14 @@ export default function Shop() {
   const [mysteryReward, setMysteryReward] = useState<MysteryReward | null>(null);
   const [mysterySpinning, setMysterySpinning] = useState(false);
   const displayCoins = useCountUp(state.coins);
+  const reduced = prefersReducedMotion();
+  const container = {
+    hidden: { opacity: 1 },
+    show: { opacity: 1, transition: reduced ? {} : { staggerChildren: 0.06 } },
+  };
+  const item = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, y: 15, scale: 0.95 }, show: { opacity: 1, y: 0, scale: 1, transition: springReveal } };
 
   const filteredItems = SHOP_ITEMS.filter(i => i.category === activeCategory);
 

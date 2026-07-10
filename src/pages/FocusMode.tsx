@@ -3,6 +3,11 @@ import { useGame } from '@/context/GameContext';
 import { motion } from 'framer-motion';
 import { Play, Pause, RotateCcw, Coffee, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Magnetic } from '@/components/motion/Magnetic';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
+
+const ringSpring = { type: 'spring' as const, stiffness: 260, damping: 30, mass: 0.8 };
 
 type Mode = 'focus' | 'break';
 
@@ -152,9 +157,15 @@ export default function FocusMode() {
 
   const circumference = 2 * Math.PI * 120;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
+  const reduced = prefersReducedMotion();
 
   return (
-    <div className="max-w-lg mx-auto space-y-8 flex flex-col items-center pt-8">
+    <motion.div
+      initial={reduced ? { opacity: 1 } : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduced ? { duration: 0 } : springReveal}
+      className="max-w-lg mx-auto space-y-8 flex flex-col items-center pt-8"
+    >
       <div className="text-center">
         <h1>
           {mode === 'focus' ? 'Focus Mode 🧠' : 'Break Time ☕'}
@@ -178,7 +189,7 @@ export default function FocusMode() {
             strokeDashoffset={strokeDashoffset}
             initial={false}
             animate={{ strokeDashoffset }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+            transition={reduced ? { duration: 0 } : ringSpring}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -196,13 +207,15 @@ export default function FocusMode() {
         <Button variant="outline" size="icon" onClick={reset} className="h-12 w-12 rounded-full">
           <RotateCcw className="h-5 w-5" />
         </Button>
-        <Button
-          onClick={() => { stopAlarm(); setIsRunning(!isRunning); }}
-          className="h-14 w-14 rounded-full text-lg"
-          size="icon"
-        >
-          {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
-        </Button>
+        <Magnetic strength={8}>
+          <Button
+            onClick={() => { stopAlarm(); setIsRunning(!isRunning); }}
+            className="h-14 w-14 rounded-full text-lg"
+            size="icon"
+          >
+            {isRunning ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-0.5" />}
+          </Button>
+        </Magnetic>
         <Button
           variant="outline"
           size="icon"
@@ -243,6 +256,6 @@ export default function FocusMode() {
           {sessionsCompleted * 30} XP earned from focus sessions
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }

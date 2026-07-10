@@ -1,20 +1,23 @@
 import { useGame } from '@/context/GameContext';
 import { motion } from 'framer-motion';
 import { ShareCard } from '@/components/profile/ShareCard';
-
-const container = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
-};
-const item = {
-  hidden: { opacity: 0, scale: 0.8 },
-  show: { opacity: 1, scale: 1 },
-};
+import { Reveal } from '@/components/motion/Reveal';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 export default function Achievements() {
   const { state } = useGame();
   const unlocked = state.achievements.filter(a => a.unlockedAt);
   const locked = state.achievements.filter(a => !a.unlockedAt);
+  const reduced = prefersReducedMotion();
+
+  const container = {
+    hidden: { opacity: 1 },
+    show: { opacity: 1, transition: reduced ? {} : { staggerChildren: 0.05 } },
+  };
+  const item = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, scale: 0.8 }, show: { opacity: 1, scale: 1, transition: springReveal } };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -43,7 +46,7 @@ export default function Achievements() {
       )}
 
       {locked.length > 0 && (
-        <div>
+        <Reveal direction="up">
           <h2 className="mb-3 text-muted-foreground">Locked</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {locked.map(a => (
@@ -54,7 +57,7 @@ export default function Achievements() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       )}
     </div>
   );

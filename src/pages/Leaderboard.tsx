@@ -9,6 +9,8 @@ import {
   tierInfo, zoneFor, msUntilWeeklyReset, formatCountdown,
   PROMOTION_ZONE, RELEGATION_ZONE, MAX_TIER,
 } from '@/lib/league';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 function initials(name: string): string {
   return name.trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase() ?? '').join('') || 'S';
@@ -29,9 +31,15 @@ export default function Leaderboard() {
   const total = standings.length;
   const reset = formatCountdown(msUntilWeeklyReset(new Date(now)));
   const rank = getRank(state.level);
+  const reduced = prefersReducedMotion();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <motion.div
+      initial={reduced ? { opacity: 1 } : { opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={reduced ? { duration: 0 } : springReveal}
+      className="max-w-3xl mx-auto space-y-6"
+    >
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -87,9 +95,9 @@ export default function Leaderboard() {
               return (
                 <div key={row.user_id}>
                   <motion.div
-                    initial={{ opacity: 0, x: -8 }}
+                    initial={reduced ? { opacity: 1 } : { opacity: 0, x: -8 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(i * 0.02, 0.4) }}
+                    transition={reduced ? { duration: 0 } : { ...springReveal, delay: Math.min(i * 0.02, 0.4) }}
                     className={`flex items-center gap-3 p-2.5 rounded-lg border ${
                       row.is_me ? 'bg-primary/10 border-primary/40' : 'border-transparent hover:bg-muted/40'
                     }`}
@@ -136,6 +144,6 @@ export default function Leaderboard() {
       <p className="text-center text-[11px] text-muted-foreground">
         Positive-sum: you only ever gain XP — no one can take it from you. {rank.title} · keep going!
       </p>
-    </div>
+    </motion.div>
   );
 }

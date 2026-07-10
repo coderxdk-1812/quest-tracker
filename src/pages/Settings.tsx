@@ -15,6 +15,8 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import type { ThemeId } from '@/context/GameContext';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 // All available themes with display metadata
 const THEME_META: { id: ThemeId; name: string; icon: string; swatch: string }[] = [
@@ -138,17 +140,27 @@ export default function Settings() {
     toast.error('Account deletion must be completed through Supabase support for safety reasons.');
   }
 
+  const reduced = prefersReducedMotion();
+  const item = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: springReveal } };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div>
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{ hidden: {}, show: { transition: reduced ? {} : { staggerChildren: 0.07 } } }}
+      className="max-w-2xl mx-auto space-y-6"
+    >
+      <motion.div variants={item}>
         <h1 className="flex items-center gap-2">
           <SettingsIcon className="h-8 w-8 text-primary" /> Settings
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Manage your profile, appearance, and preferences.</p>
-      </div>
+      </motion.div>
 
       {/* Profile */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 space-y-5">
+      <motion.div variants={item} className="glass-card p-6 space-y-5">
         <h2 className="flex items-center gap-2">
           <User className="h-5 w-5 text-primary" /> Profile
         </h2>
@@ -165,11 +177,7 @@ export default function Settings() {
       </motion.div>
 
       {/* Appearance */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0, transition: { delay: 0.05 } }}
-        className="glass-card p-6 space-y-5"
-      >
+      <motion.div variants={item} className="glass-card p-6 space-y-5">
         <h2 className="flex items-center gap-2">
           {state.darkMode ? <Moon className="h-5 w-5 text-primary" /> : <Sun className="h-5 w-5 text-primary" />}
           Appearance
@@ -235,11 +243,7 @@ export default function Settings() {
       </motion.div>
 
       {/* Privacy */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-        className="glass-card p-6 space-y-5"
-      >
+      <motion.div variants={item} className="glass-card p-6 space-y-5">
         <h2 className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-primary" /> Privacy
         </h2>
@@ -257,11 +261,7 @@ export default function Settings() {
       </motion.div>
 
       {/* Notifications */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0, transition: { delay: 0.15 } }}
-        className="glass-card p-6 space-y-5"
-      >
+      <motion.div variants={item} className="glass-card p-6 space-y-5">
         <h2 className="flex items-center gap-2">
           <Bell className="h-5 w-5 text-primary" /> Notifications
         </h2>
@@ -299,14 +299,14 @@ export default function Settings() {
       </motion.div>
 
       {/* Save / Danger */}
-      <div className="flex items-center justify-between gap-4">
+      <motion.div variants={item} className="flex items-center justify-between gap-4">
         <Button variant="destructive" size="sm" onClick={openDeleteDialog} className="gap-2">
           <Trash2 className="h-4 w-4" /> Delete Account
         </Button>
         <Button onClick={saveProfile} disabled={saving} className="px-8">
           {saving ? 'Saving…' : 'Save Changes'}
         </Button>
-      </div>
+      </motion.div>
 
       {/* Delete account confirmation dialog */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -345,6 +345,6 @@ export default function Settings() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }

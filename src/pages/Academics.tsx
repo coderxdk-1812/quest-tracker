@@ -9,6 +9,9 @@ import {
   daysUntil, examUrgency, countdownLabel, goalProgress, effortForSubjects,
   nextConfidence, CONFIDENCE_HSL, type Confidence,
 } from '@/lib/academics';
+import { Reveal } from '@/components/motion/Reveal';
+import { springReveal } from '@/lib/motion';
+import { prefersReducedMotion } from '@/lib/utils';
 
 const URGENCY_CLASS: Record<string, string> = {
   past: 'text-muted-foreground', today: 'text-destructive', urgent: 'text-destructive',
@@ -57,22 +60,32 @@ export default function Academics() {
     setCTopic('');
   };
 
+  const reduced = prefersReducedMotion();
+  const headerItem = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: springReveal } };
+
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div>
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{ hidden: {}, show: { transition: reduced ? {} : { staggerChildren: 0.08 } } }}
+      className="max-w-5xl mx-auto space-y-6"
+    >
+      <motion.div variants={headerItem}>
         <h1 className="flex items-center gap-2">
           <Target className="h-7 w-7 text-primary" /> Academics
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
           Your goals, exam countdowns, effort and confidence — no grades, works for any curriculum.
         </p>
-      </div>
+      </motion.div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <div className="grid md:grid-cols-2 gap-6 items-start">
+      <div className="grid md:grid-cols-5 gap-6 items-start">
       {/* GOALS */}
-      <section className="glass-card p-5">
+      <motion.section variants={headerItem} className="glass-card p-5 md:col-span-3">
         <h2 className="mb-3">Goals</h2>
 
         <div className="flex flex-wrap gap-2 mb-4">
@@ -97,6 +110,7 @@ export default function Academics() {
               const urg = days !== null ? examUrgency(days) : null;
               return (
                 <motion.div key={g.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+                  transition={reduced ? { duration: 0 } : springReveal}
                   className="p-3 rounded-lg border border-border bg-muted/30">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -130,10 +144,10 @@ export default function Academics() {
             })}
           </div>
         )}
-      </section>
+      </motion.section>
 
       {/* EFFORT */}
-      <section className="glass-card p-5">
+      <motion.section variants={headerItem} className="glass-card p-5 md:col-span-2">
         <h2 className="mb-1 flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" /> Effort by subject
         </h2>
@@ -155,11 +169,11 @@ export default function Academics() {
             ))}
           </div>
         )}
-      </section>
+      </motion.section>
       </div>
 
       {/* CONFIDENCE */}
-      <section className="glass-card p-5">
+      <Reveal direction="up" className="glass-card p-5">
         <h2 className="mb-1 flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" /> Confidence
         </h2>
@@ -200,11 +214,11 @@ export default function Academics() {
             ))}
           </div>
         )}
-      </section>
+      </Reveal>
 
       <datalist id="acad-subjects">
         {subjects.map(s => <option key={s} value={s} />)}
       </datalist>
-    </div>
+    </motion.div>
   );
 }

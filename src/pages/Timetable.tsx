@@ -10,7 +10,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar as CalendarPicker } from '@/components/ui/calendar';
 import { TaskCheckbox } from '@/components/tasks/TaskCheckbox';
 import { format, startOfWeek, addDays, addWeeks, subWeeks, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay, isSameMonth, isToday, parseISO } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, prefersReducedMotion } from '@/lib/utils';
+import { Magnetic } from '@/components/motion/Magnetic';
+import { Reveal } from '@/components/motion/Reveal';
+import { springReveal } from '@/lib/motion';
+
+const blockSpring = { type: 'spring' as const, stiffness: 380, damping: 30, mass: 0.7 };
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const HOURS = Array.from({ length: 19 }, (_, i) => i + 5);
@@ -181,9 +186,19 @@ export default function Timetable() {
     (form.isRecurring ? form.days.length > 0 : !!form.specificDate) &&
     minutesFromHHMM(form.endTime) > minutesFromHHMM(form.startTime);
 
+  const reduced = prefersReducedMotion();
+  const headerItem = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: springReveal } };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{ hidden: {}, show: { transition: reduced ? {} : { staggerChildren: 0.07 } } }}
+      className="max-w-7xl mx-auto space-y-6"
+    >
+      <motion.div variants={headerItem} className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1>Timetable 📅</h1>
           <p className="text-muted-foreground text-sm mt-1">
@@ -199,11 +214,13 @@ export default function Timetable() {
             onChange={e => setFilter(e.target.value)}
             className="w-56"
           />
-          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />Add Class</Button>
+          <Magnetic strength={6}>
+            <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />Add Class</Button>
+          </Magnetic>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <motion.div variants={headerItem} className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={prev}><ChevronLeft className="h-4 w-4" /></Button>
           <Button variant="outline" size="sm" onClick={goToday}>Today</Button>
@@ -232,26 +249,28 @@ export default function Timetable() {
             <TabsTrigger value="month">Month</TabsTrigger>
           </TabsList>
         </Tabs>
-      </div>
+      </motion.div>
 
-      {view === 'week' ? (
-        <WeekView
-          anchor={anchor}
-          classes={visibleClasses}
-          tasks={scheduledTasks}
-          onEditClass={openEdit}
-          onToggleTask={(id) => toggleTask(id)}
-        />
-      ) : (
-        <MonthView
-          anchor={anchor}
-          classes={visibleClasses}
-          tasks={scheduledTasks}
-          onJumpDay={(d) => { setAnchor(d); setView('week'); }}
-        />
-      )}
+      <motion.div variants={headerItem}>
+        {view === 'week' ? (
+          <WeekView
+            anchor={anchor}
+            classes={visibleClasses}
+            tasks={scheduledTasks}
+            onEditClass={openEdit}
+            onToggleTask={(id) => toggleTask(id)}
+          />
+        ) : (
+          <MonthView
+            anchor={anchor}
+            classes={visibleClasses}
+            tasks={scheduledTasks}
+            onJumpDay={(d) => { setAnchor(d); setView('week'); }}
+          />
+        )}
+      </motion.div>
 
-      <div className="glass-card p-5">
+      <Reveal direction="up" className="glass-card p-5">
         <h2 className="mb-3">Unscheduled</h2>
         {unscheduledTasks.length === 0 ? (
           <p className="text-sm text-muted-foreground">All your tasks are scheduled. 🎉</p>
@@ -284,7 +303,7 @@ export default function Timetable() {
             ))}
           </div>
         )}
-      </div>
+      </Reveal>
 
       {/* Class create/edit dialog */}
       <Dialog open={classDialogOpen} onOpenChange={setClassDialogOpen}>
@@ -455,7 +474,7 @@ export default function Timetable() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
 
@@ -475,6 +494,7 @@ function WeekView({
   const todayIdx = isSameDay(weekStart, startOfWeek(now, { weekStartsOn: 1 })) ? dayIndexFromDate(now) : -1;
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const startBaseMin = HOURS[0] * 60;
+  const reduced = prefersReducedMotion();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -537,8 +557,9 @@ function WeekView({
                 return (
                   <motion.button
                     key={c.id + '-' + dayIdx}
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={reduced ? false : { opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
+                    transition={reduced ? { duration: 0 } : blockSpring}
                     onClick={() => onEditClass(c)}
                     className="absolute left-0.5 right-0.5 rounded-lg p-1.5 text-left text-white text-[11px] overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
                     style={{ top, height: Math.max(20, height), backgroundColor: getBlockColour(c) }}
@@ -570,8 +591,9 @@ function WeekView({
                 return (
                   <motion.button
                     key={'task-' + t.id}
-                    initial={{ opacity: 0, x: -5 }}
+                    initial={reduced ? false : { opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
+                    transition={reduced ? { duration: 0 } : blockSpring}
                     onClick={() => onToggleTask(t.id)}
                     className={cn(
                       'absolute left-0.5 right-0.5 rounded-md px-1.5 py-1 text-[11px] z-10 text-left flex items-center gap-1 backdrop-blur-sm',

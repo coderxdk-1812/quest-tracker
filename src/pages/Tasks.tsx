@@ -15,9 +15,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+import { cn, prefersReducedMotion } from '@/lib/utils';
 import { format } from 'date-fns';
 import { getSavedSubjects, setSavedSubjects as persistSavedSubjects, subscribeSavedSubjects } from '@/lib/userPrefs';
+import { Magnetic } from '@/components/motion/Magnetic';
+
+const listItemSpring = { type: 'spring' as const, stiffness: 420, damping: 34, mass: 0.7 };
 
 const PRIORITY_CONFIG: Record<Priority, { label: string; class: string; xp: number; weight: number; dot: string }> = {
   easy:   { label: 'Low',    class: 'bg-easy/15 text-easy border-easy/30',       xp: 10, weight: 1, dot: 'bg-easy' },
@@ -229,18 +232,30 @@ export default function Tasks() {
     return list;
   }, [state.tasks, search, statusFilter, subjectFilter, priorityFilter]);
 
+  const reduced = prefersReducedMotion();
+  const headerItem = reduced
+    ? { hidden: { opacity: 1 }, show: { opacity: 1 } }
+    : { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: listItemSpring } };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={{ hidden: {}, show: { transition: reduced ? {} : { staggerChildren: 0.06 } } }}
+      className="max-w-4xl mx-auto space-y-6"
+    >
+      <motion.div variants={headerItem} className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1>Tasks ✅</h1>
           <p className="text-muted-foreground text-sm mt-1">Plan, prioritise and crush your assignments.</p>
         </div>
-        <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />New Task</Button>
-      </div>
+        <Magnetic strength={6}>
+          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" />New Task</Button>
+        </Magnetic>
+      </motion.div>
 
       {/* Toolbar */}
-      <div className="glass-card p-3 flex flex-wrap gap-2 items-center">
+      <motion.div variants={headerItem} className="glass-card p-3 flex flex-wrap gap-2 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -277,7 +292,7 @@ export default function Tasks() {
             </SelectContent>
           </Select>
         )}
-      </div>
+      </motion.div>
 
       {/* Task list */}
       <div className="space-y-2">
@@ -294,6 +309,7 @@ export default function Tasks() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -60 }}
+                transition={listItemSpring}
                 className={cn(
                   'glass-card p-4 flex items-start gap-3 group transition-all',
                   task.completed && 'opacity-60',
@@ -616,6 +632,6 @@ export default function Tasks() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
