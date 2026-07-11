@@ -19,6 +19,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Academics from "./pages/Academics";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
