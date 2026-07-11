@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wand2, Trash2, Plus, RefreshCw, Play, CheckCircle2, Circle, Sparkles, HelpCircle } from 'lucide-react';
+import { Wand2, Trash2, Plus, RefreshCw, Play, CheckCircle2, Circle, Sparkles, HelpCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,15 +8,26 @@ import {
   breakdownTask, classifyIntent, clarifyingQuestions,
   type TaskDifficulty, type SlotAnswers, type QuestIntent,
 } from '@/lib/questBreakdown';
+import {
+  breakdown as modelBreakdown, clarify as modelClarify, refine as modelRefine,
+  isOnDeviceAssistantEnabled, subscribeModelStatus, getModelStatus,
+  type ModelTaskJson, type ClarifyQuestion,
+} from '@/lib/localModel';
 import type { Subtask } from '@/context/GameContext';
 
 /**
  * Controlled, editable subtask editor.
  * The parent owns the subtasks (so they save with the task); this component
  * generates, edits, deletes, clears, and regenerates them — and asks clarifying
- * questions when the task is too vague for specific steps. Answers are kept
- * keyed by slot (see questBreakdown.ts's QuestionSlot) and persist across
- * repeated regenerates so each pass sharpens on top of the last.
+ * questions when the task is too vague for specific steps.
+ *
+ * When the on-device assistant (src/lib/localModel.ts) is enabled, every
+ * action tries it first: breakdown() for initial generation, clarify() to
+ * find genuinely vague steps, refine() to sharpen using the user's answers.
+ * Any failure there (unsupported browser, load failure, timeout, invalid
+ * output) transparently falls back to the deterministic rule engine
+ * (src/lib/questBreakdown.ts) — the UX is identical either way, just the
+ * source of the steps differs.
  */
 export interface QuestBreakdownProps {
   title: string;
@@ -36,15 +47,26 @@ const uid = () =>
     ? crypto.randomUUID()
     : 's_' + Math.random().toString(36).slice(2);
 
+const toSubtasks = (labels: string[]): Subtask[] => labels.map(label => ({ id: uid(), label, done: false }));
+
 export function QuestBreakdown({
   title, description, subject, priority, tags, deadline,
   value, onChange, onStartFocus,
 }: QuestBreakdownProps) {
   const navigate = useNavigate();
   const [clarifyOpen, setClarifyOpen] = useState(false);
+  // Rule-engine mode: answers keyed by slot (see questBreakdown.ts's QuestionSlot).
   // Persisted across regenerates (not reset) so reopening the panel lets the
   // user add/adjust answers and sharpen further, rather than starting over.
   const [answers, setAnswers] = useState<SlotAnswers>({});
+  // Model mode: the model's own targeted questions, and answers keyed by the
+  // step index they target (stable-ish across regenerates, unlike array position).
+  const [modelQuestions, setModelQuestions] = useState<ClarifyQuestion[] | null>(null);
+  const [modelAnswers, setModelAnswers] = useState<Record<number, string>>({});
+  const [usingModel, setUsingModel] = useState(false);
+
+  const [thinking, setThinking] = useState(false);
+  const [thinkingLabel, setThinkingLabel] = useState('Thinking…');
   const [justRegenerated, setJustRegenerated] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
 
@@ -66,10 +88,41 @@ export function QuestBreakdown({
     return () => clearTimeout(t);
   }, [justRegenerated]);
 
-  const generate = (structuredAnswers?: SlotAnswers, lockedIntent?: QuestIntent) => {
+  // While thinking, surface download progress on first-ever model use rather
+  // than a bare spinner — a multi-second wait needs more than "Thinking…".
+  useEffect(() => {
+    if (!thinking) return;
+    const update = (status: string, progress: number) => {
+      setThinkingLabel(status === 'loading' ? `Downloading on-device assistant… ${progress}%` : 'Thinking…');
+    };
+    const s = getModelStatus();
+    update(s.status, s.progress);
+    return subscribeModelStatus(update);
+  }, [thinking]);
+
+  const buildTaskJson = (lockedIntent?: QuestIntent): ModelTaskJson => ({
+    title,
+    description: description ?? null,
+    subject: subject ?? null,
+    intent: lockedIntent ?? intent,
+    priority: priority ?? 'medium',
+    deadline: deadline ?? null,
+    tags: tags ?? [],
+  });
+
+  /** Fresh generation (empty state, or "Just regenerate") — model first, rule engine fallback. */
+  const generate = async (structuredAnswers?: SlotAnswers, lockedIntent?: QuestIntent) => {
+    if (isOnDeviceAssistantEnabled()) {
+      setThinking(true);
+      const modelSteps = await modelBreakdown(buildTaskJson(lockedIntent));
+      setThinking(false);
+      if (modelSteps) {
+        onChange(toSubtasks(modelSteps));
+        return;
+      }
+    }
     const r = breakdownTask({ title, description, subject, priority, tags, deadline, intent: lockedIntent, answers: structuredAnswers });
     onChange(r.steps.map(s => ({ id: uid(), label: s.label, done: false })));
-    return r;
   };
 
   const flashHighlight = () => {
@@ -77,18 +130,72 @@ export function QuestBreakdown({
     requestAnimationFrame(() => setJustRegenerated(true));
   };
 
-  const regenerateWithAnswers = () => {
-    const hasAnyAnswer = Object.values(answers).some(v => v?.trim());
-    const withAnswers = generate(answers, intent);
+  /** "Regenerate" clicked — opens the clarify panel, asking the model to target real vague steps first. */
+  const openClarifyPanel = async () => {
+    if (isOnDeviceAssistantEnabled() && value.length > 0) {
+      setThinking(true);
+      const q = await modelClarify(buildTaskJson(), value.map(s => s.label));
+      setThinking(false);
+      if (q !== null) {
+        setUsingModel(true);
+        setModelQuestions(q);
+        if (q.length === 0) {
+          setHint(null);
+          toast.success('Your steps already look specific — nothing to clarify!');
+          return;
+        }
+        setClarifyOpen(true);
+        return;
+      }
+    }
+    setUsingModel(false);
+    setClarifyOpen(true);
+  };
 
-    if (!hasAnyAnswer) {
+  const regenerateWithModelAnswers = async () => {
+    const currentLabels = value.map(s => s.label);
+    const answerPairs = (modelQuestions || [])
+      .map(q => ({ question: q.question, answer: (modelAnswers[q.targetStepIndex] || '').trim() }))
+      .filter(a => a.answer);
+
+    setClarifyOpen(false);
+
+    if (answerPairs.length === 0) {
       toast.success('Steps updated');
       setHint(null);
+      flashHighlight();
+      return;
+    }
+
+    setThinking(true);
+    const sharpened = await modelRefine(buildTaskJson(), currentLabels, answerPairs);
+    setThinking(false);
+    flashHighlight();
+
+    if (sharpened) {
+      onChange(toSubtasks(sharpened));
+      toast.success('Sharpened with your answers');
+      setHint(null);
     } else {
+      toast.success('Steps updated');
+      setHint('Try being more specific in your answers to sharpen the steps further.');
+    }
+  };
+
+  const regenerateWithRuleEngineAnswers = () => {
+    const hasAnyAnswer = Object.values(answers).some(v => v?.trim());
+
+    const applyAndReport = (steps: { label: string }[]) => {
+      onChange(steps.map(s => ({ id: uid(), label: s.label, done: false })));
+      if (!hasAnyAnswer) {
+        toast.success('Steps updated');
+        setHint(null);
+        return;
+      }
       // Compare against an answer-less baseline (same locked intent) to tell
       // whether the answers actually changed anything visible.
       const baseline = breakdownTask({ title, description, subject, priority, tags, deadline, intent });
-      const changed = JSON.stringify(withAnswers.steps.map(s => s.label))
+      const changed = JSON.stringify(steps.map(s => s.label))
         !== JSON.stringify(baseline.steps.map(s => s.label));
       if (changed) {
         toast.success('Sharpened with your answers');
@@ -100,17 +207,29 @@ export function QuestBreakdown({
           ? `Answering "${unanswered.question}" would sharpen this further.`
           : 'Try being more specific in your answers to sharpen the steps further.');
       }
-    }
+    };
+
+    const r = breakdownTask({ title, description, subject, priority, tags, deadline, intent, answers });
+    applyAndReport(r.steps);
     setClarifyOpen(false);
     flashHighlight();
   };
 
+  const regenerateWithAnswers = () => {
+    if (usingModel && modelQuestions) {
+      void regenerateWithModelAnswers();
+      return;
+    }
+    regenerateWithRuleEngineAnswers();
+  };
+
   const regenerateWithoutAnswers = () => {
-    generate(undefined, intent);
     setClarifyOpen(false);
     setHint(null);
-    toast.success('Steps updated');
-    flashHighlight();
+    void generate(undefined, intent).then(() => {
+      toast.success('Steps updated');
+      flashHighlight();
+    });
   };
 
   const update = (id: string, patch: Partial<Subtask>) =>
@@ -139,10 +258,11 @@ export function QuestBreakdown({
           </p>
         )}
         <div className="flex gap-2">
-          <Button type="button" size="sm" className="gap-2 flex-1" onClick={() => generate()}>
-            <Wand2 className="h-4 w-4" /> Generate steps
+          <Button type="button" size="sm" className="gap-2 flex-1" disabled={thinking} onClick={() => void generate()}>
+            {thinking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+            {thinking ? thinkingLabel : 'Generate steps'}
           </Button>
-          <Button type="button" size="sm" variant="outline" onClick={addBlank}>
+          <Button type="button" size="sm" variant="outline" disabled={thinking} onClick={addBlank}>
             <Plus className="h-4 w-4" /> Add manually
           </Button>
         </div>
@@ -187,42 +307,58 @@ export function QuestBreakdown({
       </div>
 
       <div className="flex flex-wrap gap-2 pt-1">
-        <Button type="button" size="sm" variant="outline" className="gap-1" onClick={addBlank}>
+        <Button type="button" size="sm" variant="outline" className="gap-1" disabled={thinking} onClick={addBlank}>
           <Plus className="h-3.5 w-3.5" /> Add step
         </Button>
-        <Button type="button" size="sm" variant="outline" className="gap-1" onClick={() => setClarifyOpen(o => !o)}>
-          <RefreshCw className="h-3.5 w-3.5" /> Regenerate
+        <Button type="button" size="sm" variant="outline" className="gap-1" disabled={thinking} onClick={() => (clarifyOpen ? setClarifyOpen(false) : void openClarifyPanel())}>
+          {thinking ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+          {thinking ? thinkingLabel : 'Regenerate'}
         </Button>
-        <Button type="button" size="sm" variant="ghost" className="gap-1 text-destructive" onClick={clearAll}>
+        <Button type="button" size="sm" variant="ghost" className="gap-1 text-destructive" disabled={thinking} onClick={clearAll}>
           <Trash2 className="h-3.5 w-3.5" /> Clear all
         </Button>
-        <Button type="button" size="sm" className="gap-1 ml-auto" onClick={() => (onStartFocus ? onStartFocus() : navigate('/focus'))}>
+        <Button type="button" size="sm" className="gap-1 ml-auto" disabled={thinking} onClick={() => (onStartFocus ? onStartFocus() : navigate('/focus'))}>
           <Play className="h-3.5 w-3.5" /> Start step 1
         </Button>
       </div>
 
-      {/* Regenerate → clarify (Tasks #7) */}
+      {/* Regenerate → clarify (Tasks #7); questions come from the on-device
+          model when available (targeting real vague steps), otherwise the
+          rule engine's fixed per-intent slots. */}
       {clarifyOpen && (
         <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 space-y-2">
           <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
             <HelpCircle className="h-3.5 w-3.5 text-primary" /> Answer a couple of things for sharper steps (optional):
           </p>
-          {questions.map(q => (
-            <div key={q.key}>
-              <label className="text-[11px] font-medium block mb-0.5">{q.question}</label>
-              <Input
-                value={answers[q.key] || ''}
-                placeholder={q.placeholder}
-                onChange={e => setAnswers(a => ({ ...a, [q.key]: e.target.value }))}
-                className="h-8 text-sm"
-              />
-            </div>
-          ))}
+          {usingModel && modelQuestions
+            ? modelQuestions.map(q => (
+              <div key={q.targetStepIndex}>
+                <label className="text-[11px] font-medium block mb-0.5">{q.question}</label>
+                <p className="text-[10px] text-muted-foreground mb-1 italic">re: "{q.targetStepText}"</p>
+                <Input
+                  value={modelAnswers[q.targetStepIndex] || ''}
+                  onChange={e => setModelAnswers(a => ({ ...a, [q.targetStepIndex]: e.target.value }))}
+                  className="h-8 text-sm"
+                />
+              </div>
+            ))
+            : questions.map(q => (
+              <div key={q.key}>
+                <label className="text-[11px] font-medium block mb-0.5">{q.question}</label>
+                <Input
+                  value={answers[q.key] || ''}
+                  placeholder={q.placeholder}
+                  onChange={e => setAnswers(a => ({ ...a, [q.key]: e.target.value }))}
+                  className="h-8 text-sm"
+                />
+              </div>
+            ))}
           <div className="flex gap-2 pt-1">
-            <Button type="button" size="sm" className="flex-1" onClick={regenerateWithAnswers}>
-              Regenerate with this
+            <Button type="button" size="sm" className="flex-1 gap-1.5" disabled={thinking} onClick={regenerateWithAnswers}>
+              {thinking && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {thinking ? thinkingLabel : 'Regenerate with this'}
             </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={regenerateWithoutAnswers}>
+            <Button type="button" size="sm" variant="ghost" disabled={thinking} onClick={regenerateWithoutAnswers}>
               Just regenerate
             </Button>
           </div>

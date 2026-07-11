@@ -5,7 +5,8 @@ import { useGame } from '@/context/GameContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { enableWebPush, disableWebPush, isWebPushActive, isWebPushSupported } from '@/lib/webPush';
-import { Settings as SettingsIcon, User, Bell, Shield, Moon, Sun, Trash2, Check } from 'lucide-react';
+import { isOnDeviceAssistantEnabled, setOnDeviceAssistantEnabled } from '@/lib/localModel';
+import { Settings as SettingsIcon, User, Bell, Shield, Moon, Sun, Trash2, Check, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,6 +59,9 @@ export default function Settings() {
   const [pushBusy, setPushBusy]                 = useState(false);
   const pushSupported = isWebPushSupported();
 
+  // On-device AI assistant (src/lib/localModel.ts)
+  const [onDeviceEnabled, setOnDeviceEnabled]   = useState(false);
+
   // Delete account dialog
   const [deleteOpen, setDeleteOpen]             = useState(false);
   const [deleteInput, setDeleteInput]           = useState('');
@@ -76,6 +80,15 @@ export default function Settings() {
   }, [profile]);
 
   useEffect(() => { isWebPushActive().then(setPushEnabled); }, []);
+  useEffect(() => { setOnDeviceEnabled(isOnDeviceAssistantEnabled()); }, []);
+
+  function toggleOnDeviceAssistant(next: boolean) {
+    setOnDeviceAssistantEnabled(next);
+    setOnDeviceEnabled(next);
+    toast.success(next
+      ? 'On-device assistant enabled — it will download once, then run fully offline.'
+      : 'On-device assistant disabled');
+  }
 
   async function togglePush(next: boolean) {
     if (!user) return;
@@ -318,6 +331,24 @@ export default function Settings() {
               <Switch checked={pref.value} onCheckedChange={pref.set} />
             </div>
           ))}
+        </div>
+      </motion.div>
+
+      {/* On-device AI assistant */}
+      <motion.div variants={item} className="glass-card p-6 space-y-4">
+        <h2 className="flex items-center gap-2">
+          <Cpu className="h-5 w-5 text-primary" /> On-device AI assistant
+        </h2>
+        <div className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/30 p-3">
+          <div className="pr-4">
+            <p className="font-medium">Smarter task breakdowns</p>
+            <p className="text-sm text-muted-foreground">
+              Runs fully on your device — nothing about your tasks is ever sent anywhere. Downloads once
+              (~100MB), then works offline. If it's ever unavailable, Zenith quietly falls back to the
+              built-in step generator, so breakdown always works either way.
+            </p>
+          </div>
+          <Switch checked={onDeviceEnabled} onCheckedChange={toggleOnDeviceAssistant} />
         </div>
       </motion.div>
 

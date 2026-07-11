@@ -1,0 +1,17 @@
+# On-device quest-breakdown model — training/eval/conversion dependencies.
+# Deliberately isolated from the web app's package.json (see ml/README.md).
+#
+# ml/data/*.py (dataset generation + validation) needs NONE of this — it's
+# pure stdlib on purpose, so the dataset can be rebuilt without installing
+# any of the below.
+
+transformers>=4.41,<5
+datasets>=2.19,<3
+torch>=2.2
+accelerate>=0.30
+sentencepiece>=0.2
+evaluate>=0.4
+rouge-score>=0.1.2
+optimum[onnxruntime]>=1.19
+onnx>=1.16
+onnxruntime>=1.17

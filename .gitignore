@@ -23,3 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
+# ml/ — Python venv, training runs/checkpoints, converted-model artifacts.
+# The processed dataset (ml/data/processed/) IS committed — see ml/README.md.
+ml/.venv
+ml/runs
+ml/onnx
+ml/**/__pycache__
+ml/**/*.pyc
+
