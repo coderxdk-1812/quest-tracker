@@ -361,6 +361,7 @@ export type Database = {
           description: string | null
           id: string
           priority: string
+          recurrence: Json | null
           subject: string | null
           subject_color: string | null
           subtasks: Json
@@ -377,6 +378,7 @@ export type Database = {
           description?: string | null
           id?: string
           priority?: string
+          recurrence?: Json | null
           subject?: string | null
           subject_color?: string | null
           subtasks?: Json
@@ -393,6 +395,7 @@ export type Database = {
           description?: string | null
           id?: string
           priority?: string
+          recurrence?: Json | null
           subject?: string | null
           subject_color?: string | null
           subtasks?: Json
