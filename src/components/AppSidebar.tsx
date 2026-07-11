@@ -3,7 +3,7 @@ import { NavLink } from '@/components/NavLink';
 import { useGame } from '@/context/GameContext';
 import { useAuth } from '@/context/AuthContext';
 import { ZenithWordmark } from '@/components/ZenithWordmark';
-import zenithLogo from '@/assets/zenith-logo.svg';
+import { ZenithTile } from '@/components/ZenithTile';
 import {
   Sidebar,
   SidebarContent,
@@ -39,7 +39,7 @@ export function AppSidebar() {
         <div className={`p-4 ${collapsed ? 'px-2' : ''}`}>
           <div className="flex items-center gap-2 mb-6">
             {collapsed ? (
-              <img src={zenithLogo} alt="Zenith" width={32} height={32} />
+              <ZenithTile size={32} />
             ) : (
               <div className="text-foreground">
                 <ZenithWordmark height={36} />

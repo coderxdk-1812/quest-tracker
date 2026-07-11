@@ -1,24 +1,24 @@
 import { useId } from 'react';
 
-interface ZenithWordmarkProps {
-  height?: number;
+interface ZenithTileProps {
+  size?: number;
   className?: string;
 }
 
 /**
- * Horizontal lockup (gradient tile + "Zenith" text). The text uses currentColor so it
- * stays legible across themes/light/dark — render this inside an element with the
- * text color you want (e.g. text-foreground). The tile gradient reads live from the
- * active theme's --primary/--accent tokens, so it recolors with every theme switch.
- * Gradient id is unique per instance via useId so multiple mounts on one page never
- * collide.
+ * Standalone square logo mark (gradient tile, no wordmark) — for spots that
+ * show just the icon, like the collapsed sidebar or the loading screen. The
+ * gradient reads live from the active theme's --primary/--accent tokens, so
+ * it recolors with every theme switch. Gradient id is unique per instance
+ * via useId so multiple mounts on one page never collide.
  */
-export function ZenithWordmark({ height = 40, className }: ZenithWordmarkProps) {
+export function ZenithTile({ size = 40, className }: ZenithTileProps) {
   const gradientId = useId();
   return (
     <svg
-      viewBox="0 0 920 260"
-      height={height}
+      viewBox="0 0 260 260"
+      width={size}
+      height={size}
       className={className}
       role="img"
       aria-label="Zenith"
@@ -51,19 +51,8 @@ export function ZenithWordmark({ height = 40, className }: ZenithWordmarkProps) 
         />
         <path d="M256 64 Q268 108 312 120 Q268 132 256 176 Q244 132 200 120 Q244 108 256 64 Z" fill="#ffffff" />
       </g>
-      <text
-        x="286"
-        y="172"
-        fontFamily="Inter, ui-sans-serif, system-ui, sans-serif"
-        fontSize="150"
-        fontWeight="700"
-        letterSpacing="-4"
-        fill="currentColor"
-      >
-        Zenith
-      </text>
     </svg>
   );
 }
 
-export default ZenithWordmark;
+export default ZenithTile;

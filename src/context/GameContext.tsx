@@ -231,6 +231,14 @@ export const SHOP_ITEMS: ShopItem[] = [
   { id: 'theme_aurora', name: 'Aurora', description: 'Teal, green & violet borealis — light and dark modes', icon: '🌌', price: 1500, category: 'theme', tier: 'prestige', oneTime: true },
 ];
 
+// Theme -> shop tier, derived from SHOP_ITEMS. 'default' has no shop entry (it's free/starter).
+export const THEME_TIER: Record<ThemeId, ShopTier | 'default'> = SHOP_ITEMS
+  .filter((item): item is ShopItem & { tier: ShopTier } => item.category === 'theme' && !!item.tier)
+  .reduce((acc, item) => {
+    acc[item.id.replace('theme_', '') as ThemeId] = item.tier;
+    return acc;
+  }, { default: 'default' } as Record<ThemeId, ShopTier | 'default'>);
+
 
 export interface EarnableBadge {
   id: string;
@@ -803,6 +811,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Apply theme and dark mode
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', state.activeTheme);
+    document.documentElement.setAttribute('data-theme-tier', THEME_TIER[state.activeTheme] ?? 'common');
     document.documentElement.classList.toggle('dark', state.darkMode);
   }, [state.activeTheme, state.darkMode]);
 

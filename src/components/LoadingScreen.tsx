@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import zenithLogo from '@/assets/zenith-logo.svg';
+import { ZenithTile } from '@/components/ZenithTile';
 
 const MESSAGES = [
   'Sharpening pencils…',
@@ -21,7 +21,7 @@ export function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center">
-        <img src={zenithLogo} alt="Zenith" width={64} height={64} className="mx-auto mb-4" />
+        <ZenithTile size={64} className="mx-auto mb-4" />
         <p className="text-muted-foreground">{MESSAGES[i]}</p>
       </div>
     </div>
