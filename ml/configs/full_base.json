@@ -1,5 +1,5 @@
 {
-  "_comment": "Same as full.json but scaled up to flan-t5-base, for if flan-t5-small's eval quality (ml/eval.py) doesn't clear the acceptance bar. Needs a GPU with more memory than the small run.",
+  "_comment": "Same as full.json but scaled up to flan-t5-base, for if flan-t5-small's eval quality (ml/eval.py) doesn't clear the acceptance bar. Needs a GPU with more memory than the small run. fp16 is deliberately OFF — see full.json's comment; T5 diverges to NaN loss in fp16 regardless of model size.",
   "model_name": "google/flan-t5-base",
   "train_file": "data/processed/train.jsonl",
   "val_file": "data/processed/val.jsonl",
@@ -16,7 +16,7 @@
   "eval_strategy": "epoch",
   "save_total_limit": 3,
   "logging_steps": 50,
-  "fp16": true,
+  "fp16": false,
   "bf16": false,
   "seed": 42,
   "warmup_ratio": 0.05,

@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from datasets import load_dataset
@@ -41,6 +42,24 @@ def load_config(path: str) -> dict:
     return cfg
 
 
+def guard_t5_fp16(cfg: dict) -> None:
+    """T5's softmax/layernorm activations overflow fp16's exponent range,
+    which reliably diverges training to NaN loss partway through — a known
+    T5 instability, not specific to this dataset or config. No config should
+    be able to trigger this by accident, so this is a hard backstop, not
+    just a comment in the config files: force fp16 off for any t5 model,
+    fp16=true or not. bf16 doesn't have this problem, but plenty of GPUs
+    (e.g. a T4) don't support it either, so fp32 is the safe default."""
+    if "t5" in cfg.get("model_name", "").lower() and cfg.get("fp16"):
+        print(
+            f"WARNING: fp16=true with model_name={cfg['model_name']!r} — T5 is numerically "
+            "unstable in fp16 and will diverge to NaN loss. Forcing fp16=false for this run. "
+            "Use bf16=true instead if your GPU supports it; otherwise fp32 (the default) is correct.",
+            file=sys.stderr,
+        )
+        cfg["fp16"] = False
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True, help="Path to a JSON config (see ml/configs/).")
@@ -50,6 +69,7 @@ def main() -> None:
     cfg = load_config(args.config)
     if args.model_name:
         cfg["model_name"] = args.model_name
+    guard_t5_fp16(cfg)
 
     set_seed(cfg["seed"])
 

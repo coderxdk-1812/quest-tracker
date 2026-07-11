@@ -1,5 +1,5 @@
 {
-  "_comment": "Full training run on the complete dataset. NEEDS A GPU (local CUDA or Colab) — see ml/README.md for how to launch it. fp16 assumes CUDA; set fp16=false and bf16=false if running on CPU/MPS only (much slower).",
+  "_comment": "Full training run on the complete dataset. NEEDS A GPU (local CUDA or Colab) — see ml/README.md for how to launch it. fp16 is deliberately OFF: T5's softmax/layernorm activations overflow fp16 range and training diverges to NaN loss partway through — this is a known T5 issue, not specific to this dataset. On a T4 (no bf16 support) that leaves fp32, which is correct and still fits these batch sizes; train.py also refuses to start with fp16 on any t5 model as a backstop.",
   "model_name": "google/flan-t5-small",
   "train_file": "data/processed/train.jsonl",
   "val_file": "data/processed/val.jsonl",
@@ -16,7 +16,7 @@
   "eval_strategy": "epoch",
   "save_total_limit": 3,
   "logging_steps": 50,
-  "fp16": true,
+  "fp16": false,
   "bf16": false,
   "seed": 42,
   "warmup_ratio": 0.05,
