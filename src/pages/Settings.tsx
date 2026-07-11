@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useGame } from '@/context/GameContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,8 +40,9 @@ const THEME_META: { id: ThemeId; name: string; icon: string; swatch: string }[] 
 const DELETE_PHRASE = 'delete my account';
 
 export default function Settings() {
-  const { profile, user, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile, signOut } = useAuth();
   const { state, dispatch } = useGame();
+  const navigate = useNavigate();
 
   const [displayName, setDisplayName]           = useState('');
   const [username, setUsername]                 = useState('');
@@ -60,6 +61,7 @@ export default function Settings() {
   // Delete account dialog
   const [deleteOpen, setDeleteOpen]             = useState(false);
   const [deleteInput, setDeleteInput]           = useState('');
+  const [deleting, setDeleting]                 = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -145,8 +147,20 @@ export default function Settings() {
 
   async function confirmDelete() {
     if (deleteInput !== DELETE_PHRASE) return;
-    setDeleteOpen(false);
-    toast.error('Account deletion must be completed through Supabase support for safety reasons.');
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error || data?.error) throw new Error(data?.error || error?.message || 'Account deletion failed');
+
+      setDeleteOpen(false);
+      await signOut();
+      navigate('/auth', { replace: true });
+      toast.success('Your account has been deleted');
+    } catch (err: any) {
+      toast.error('Could not delete account', { description: err.message });
+    } finally {
+      setDeleting(false);
+    }
   }
 
   const reduced = prefersReducedMotion();
@@ -340,15 +354,15 @@ export default function Settings() {
               className={deleteInput && deleteInput !== DELETE_PHRASE ? 'border-destructive' : ''}
             />
             <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+              <Button variant="outline" onClick={() => setDeleteOpen(false)} disabled={deleting}>
                 Cancel
               </Button>
               <Button
                 variant="destructive"
-                disabled={deleteInput !== DELETE_PHRASE}
+                disabled={deleteInput !== DELETE_PHRASE || deleting}
                 onClick={confirmDelete}
               >
-                Permanently Delete
+                {deleting ? 'Deleting…' : 'Permanently Delete'}
               </Button>
             </div>
           </div>

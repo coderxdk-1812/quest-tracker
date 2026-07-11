@@ -185,7 +185,7 @@ function fireNotification(f: ScheduledFire, settings: NotificationSettings) {
       const n = new Notification(f.title, {
         body: f.body,
         tag: f.key,
-        icon: '/placeholder.svg',
+        icon: '/zenith-logo.svg',
       });
       n.onclick = () => { window.focus(); n.close(); };
     } catch {/* ignore */}
