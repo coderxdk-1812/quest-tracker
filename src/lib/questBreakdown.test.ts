@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
-  breakdownTask, classifyIntent, formatMinutes, type QuestIntent,
+  breakdownTask, classifyIntent, clarifyingQuestions, formatMinutes,
+  type QuestIntent, type SlotAnswers,
 } from './questBreakdown';
 
 /**
@@ -98,5 +99,103 @@ describe('formatMinutes', () => {
     expect(formatMinutes(45)).toBe('45m');
     expect(formatMinutes(60)).toBe('1h');
     expect(formatMinutes(85)).toBe('1h 25m');
+  });
+});
+
+describe('clarifyingQuestions (structured slots)', () => {
+  const ALL_INTENTS: QuestIntent[] = [
+    'essay', 'problem_set', 'reading', 'lab_report', 'presentation',
+    'revision', 'coding', 'project', 'memorization', 'generic',
+  ];
+
+  it('gives every intent at least one slot-keyed question with a non-empty key', () => {
+    for (const intent of ALL_INTENTS) {
+      const qs = clarifyingQuestions(intent);
+      expect(qs.length).toBeGreaterThan(0);
+      for (const q of qs) {
+        expect(q.key.length).toBeGreaterThan(0);
+        expect(q.question.length).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('has unique slot keys within a single intent', () => {
+    for (const intent of ALL_INTENTS) {
+      const keys = clarifyingQuestions(intent).map(q => q.key);
+      expect(new Set(keys).size).toBe(keys.length);
+    }
+  });
+});
+
+/**
+ * Regression coverage for the "Regenerate with this" bug: answers to the
+ * clarifying questions must actually change the step labels, not just be
+ * appended to unused context. One case per intent that ships questions.
+ */
+describe('applyModifiers slot injection (answers sharpen steps)', () => {
+  const labelsFor = (title: string, intent: QuestIntent, answers?: SlotAnswers) =>
+    breakdownTask({ title, intent, answers }).steps.map(s => s.label);
+
+  it('essay: topic and wordCount answers change the thesis/outline/body steps', () => {
+    const base = labelsFor('Write an essay', 'essay');
+    const answers: SlotAnswers = { topic: 'the causes of WW1', wordCount: '1500' };
+    const sharpened = labelsFor('Write an essay', 'essay', answers);
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.some(l => l.includes('the causes of WW1'))).toBe(true);
+    expect(sharpened.some(l => l.includes('1500 words'))).toBe(true);
+  });
+
+  it('essay: falls back to generic wording when no answers are given', () => {
+    const r = breakdownTask({ title: 'Write an essay', intent: 'essay' });
+    expect(r.steps.some(s => s.label === 'Write a one-line thesis / main argument')).toBe(true);
+  });
+
+  it('problem_set: count and topic answers change the skim/hard steps', () => {
+    const base = labelsFor('Finish the problem set', 'problem_set');
+    const sharpened = labelsFor('Finish the problem set', 'problem_set', { count: '20', topic: 'quadratic equations' });
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.some(l => l.includes('20') && l.includes('quadratic equations'))).toBe(true);
+    expect(sharpened.some(l => l.toLowerCase().includes('hardest quadratic equations problems'))).toBe(true);
+  });
+
+  it('presentation: audience and minutes answers change the message/rehearse steps', () => {
+    const base = labelsFor('Make a presentation', 'presentation');
+    const sharpened = labelsFor('Make a presentation', 'presentation', { audience: 'the school board', minutes: '5' });
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.some(l => l.includes('the school board'))).toBe(true);
+    expect(sharpened.some(l => l.includes('~5 min'))).toBe(true);
+  });
+
+  it('coding: language and mode answers change the scaffold/restate steps', () => {
+    const base = labelsFor('Build a small app', 'coding');
+    const sharpened = labelsFor('Build a small app', 'coding', { language: 'Python', mode: 'debugging existing code' });
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.some(l => l.includes('Scaffold the Python project'))).toBe(true);
+    expect(sharpened.some(l => l.includes('Restate the bug'))).toBe(true);
+  });
+
+  it('revision: weakTopics answer changes the re-learn/practice steps', () => {
+    const base = labelsFor('Revise for the exam', 'revision');
+    const sharpened = labelsFor('Revise for the exam', 'revision', { weakTopics: 'trigonometry' });
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.filter(l => l.includes('trigonometry')).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('project: deliverable answer changes the goal step, groupOrSolo answer adds coordination step', () => {
+    const base = labelsFor('Science fair project', 'project');
+    const sharpened = labelsFor('Science fair project', 'project', {
+      deliverable: 'a working volcano model', groupOrSolo: 'group of three',
+    });
+    expect(sharpened).not.toEqual(base);
+    expect(sharpened.some(l => l.includes('a working volcano model'))).toBe(true);
+    expect(sharpened.some(l => l.toLowerCase().includes('agree who does what'))).toBe(true);
+  });
+
+  it('accumulates: a second regenerate with more answers is strictly more specific than the first', () => {
+    const first = labelsFor('Make a presentation', 'presentation', { audience: 'the class' });
+    const second = labelsFor('Make a presentation', 'presentation', { audience: 'the class', minutes: '8', slides: '12' });
+    expect(second).not.toEqual(first);
+    expect(second.some(l => l.includes('~8 min'))).toBe(true);
+    expect(second.some(l => l.includes('12 slides'))).toBe(true);
   });
 });

@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wand2, Trash2, Plus, RefreshCw, Play, CheckCircle2, Circle, Sparkles, HelpCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   breakdownTask, classifyIntent, clarifyingQuestions,
-  type TaskDifficulty,
+  type TaskDifficulty, type SlotAnswers, type QuestIntent,
 } from '@/lib/questBreakdown';
 import type { Subtask } from '@/context/GameContext';
 
@@ -13,7 +14,9 @@ import type { Subtask } from '@/context/GameContext';
  * Controlled, editable subtask editor.
  * The parent owns the subtasks (so they save with the task); this component
  * generates, edits, deletes, clears, and regenerates them — and asks clarifying
- * questions when the task is too vague for specific steps.
+ * questions when the task is too vague for specific steps. Answers are kept
+ * keyed by slot (see questBreakdown.ts's QuestionSlot) and persist across
+ * repeated regenerates so each pass sharpens on top of the last.
  */
 export interface QuestBreakdownProps {
   title: string;
@@ -39,7 +42,11 @@ export function QuestBreakdown({
 }: QuestBreakdownProps) {
   const navigate = useNavigate();
   const [clarifyOpen, setClarifyOpen] = useState(false);
-  const [answers, setAnswers] = useState<Record<number, string>>({});
+  // Persisted across regenerates (not reset) so reopening the panel lets the
+  // user add/adjust answers and sharpen further, rather than starting over.
+  const [answers, setAnswers] = useState<SlotAnswers>({});
+  const [justRegenerated, setJustRegenerated] = useState(false);
+  const [hint, setHint] = useState<string | null>(null);
 
   const combined = useMemo(
     () => [title, description, subject, (tags || []).join(' ')].filter(Boolean).join(' ').trim(),
@@ -53,19 +60,57 @@ export function QuestBreakdown({
 
   const questions = useMemo(() => clarifyingQuestions(intent), [intent]);
 
-  const generate = (extraContext?: string) => {
-    const r = breakdownTask({ title, description, subject, priority, tags, deadline, context: extraContext });
+  useEffect(() => {
+    if (!justRegenerated) return;
+    const t = setTimeout(() => setJustRegenerated(false), 1200);
+    return () => clearTimeout(t);
+  }, [justRegenerated]);
+
+  const generate = (structuredAnswers?: SlotAnswers, lockedIntent?: QuestIntent) => {
+    const r = breakdownTask({ title, description, subject, priority, tags, deadline, intent: lockedIntent, answers: structuredAnswers });
     onChange(r.steps.map(s => ({ id: uid(), label: s.label, done: false })));
+    return r;
+  };
+
+  const flashHighlight = () => {
+    setJustRegenerated(false);
+    requestAnimationFrame(() => setJustRegenerated(true));
   };
 
   const regenerateWithAnswers = () => {
-    const ctx = questions
-      .map((q, i) => (answers[i]?.trim() ? `${q} ${answers[i].trim()}` : ''))
-      .filter(Boolean)
-      .join('. ');
-    generate(ctx || undefined);
+    const hasAnyAnswer = Object.values(answers).some(v => v?.trim());
+    const withAnswers = generate(answers, intent);
+
+    if (!hasAnyAnswer) {
+      toast.success('Steps updated');
+      setHint(null);
+    } else {
+      // Compare against an answer-less baseline (same locked intent) to tell
+      // whether the answers actually changed anything visible.
+      const baseline = breakdownTask({ title, description, subject, priority, tags, deadline, intent });
+      const changed = JSON.stringify(withAnswers.steps.map(s => s.label))
+        !== JSON.stringify(baseline.steps.map(s => s.label));
+      if (changed) {
+        toast.success('Sharpened with your answers');
+        setHint(null);
+      } else {
+        toast.success('Steps updated');
+        const unanswered = questions.find(q => !answers[q.key]?.trim());
+        setHint(unanswered
+          ? `Answering "${unanswered.question}" would sharpen this further.`
+          : 'Try being more specific in your answers to sharpen the steps further.');
+      }
+    }
     setClarifyOpen(false);
-    setAnswers({});
+    flashHighlight();
+  };
+
+  const regenerateWithoutAnswers = () => {
+    generate(undefined, intent);
+    setClarifyOpen(false);
+    setHint(null);
+    toast.success('Steps updated');
+    flashHighlight();
   };
 
   const update = (id: string, patch: Partial<Subtask>) =>
@@ -116,7 +161,11 @@ export function QuestBreakdown({
         <span className="text-[11px] font-bold text-primary tabular-nums">{done}/{value.length}</span>
       </div>
 
-      <div className="space-y-1.5">
+      <div
+        className={`space-y-1.5 rounded-lg p-1.5 -m-1.5 ring-2 transition-colors duration-700 ${
+          justRegenerated ? 'ring-primary/40' : 'ring-transparent'
+        }`}
+      >
         {value.map((s, i) => (
           <div key={s.id} className="flex items-center gap-2">
             <button type="button" onClick={() => update(s.id, { done: !s.done })} className="shrink-0" aria-label="Toggle step">
@@ -158,12 +207,13 @@ export function QuestBreakdown({
           <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
             <HelpCircle className="h-3.5 w-3.5 text-primary" /> Answer a couple of things for sharper steps (optional):
           </p>
-          {questions.map((q, i) => (
-            <div key={i}>
-              <label className="text-[11px] font-medium block mb-0.5">{q}</label>
+          {questions.map(q => (
+            <div key={q.key}>
+              <label className="text-[11px] font-medium block mb-0.5">{q.question}</label>
               <Input
-                value={answers[i] || ''}
-                onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
+                value={answers[q.key] || ''}
+                placeholder={q.placeholder}
+                onChange={e => setAnswers(a => ({ ...a, [q.key]: e.target.value }))}
                 className="h-8 text-sm"
               />
             </div>
@@ -172,11 +222,17 @@ export function QuestBreakdown({
             <Button type="button" size="sm" className="flex-1" onClick={regenerateWithAnswers}>
               Regenerate with this
             </Button>
-            <Button type="button" size="sm" variant="ghost" onClick={() => { generate(); setClarifyOpen(false); }}>
+            <Button type="button" size="sm" variant="ghost" onClick={regenerateWithoutAnswers}>
               Just regenerate
             </Button>
           </div>
         </div>
+      )}
+
+      {hint && !clarifyOpen && (
+        <p className="text-[11px] text-muted-foreground inline-flex items-start gap-1">
+          <HelpCircle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" /> {hint}
+        </p>
       )}
     </div>
   );

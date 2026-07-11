@@ -15,6 +15,9 @@ export type QuestIntent =
 
 export type TaskDifficulty = 'easy' | 'medium' | 'hard';
 
+/** Structured answers to clarifyingQuestions, keyed by each question's `key` (see QUESTIONS). */
+export type SlotAnswers = Record<string, string>;
+
 export interface BreakdownInput {
   title: string;
   description?: string;
@@ -24,8 +27,10 @@ export interface BreakdownInput {
   deadline?: string;
   /** Tags add context (e.g. "group-project", "exam"). */
   tags?: string[];
-  /** Extra free-text context, e.g. answers to the clarifying questions on regenerate. */
+  /** Extra free-text context (kept for classification/signal-extraction fallback). */
   context?: string;
+  /** Structured answers to clarifying questions — these are injected directly into step labels. */
+  answers?: SlotAnswers;
   /** Optional override; if omitted the engine classifies from the combined text. */
   intent?: QuestIntent;
   /** Injectable clock for testing. */
@@ -177,6 +182,13 @@ function firstInt(re: RegExp, s: string): number | undefined {
   return m ? parseInt(m[1], 10) : undefined;
 }
 
+/** Pulls the first integer out of a free-text slot answer, e.g. "about 20" -> 20. */
+function parseNum(s?: string): number | undefined {
+  if (!s) return undefined;
+  const m = s.match(/\d{1,6}/);
+  return m ? parseInt(m[0], 10) : undefined;
+}
+
 export function extractSignals(text: string, deadline?: string, now: number = Date.now()): Signals {
   const s = text.toLowerCase();
   let urgency: Urgency = 'none';
@@ -298,36 +310,122 @@ const INTENT_LABELS: Record<QuestIntent, string> = {
 
 /* ───────────────── context-aware modifiers ───────────────── */
 
-function applyModifiers(base: Pair[], intent: QuestIntent, sig: Signals): Pair[] {
+function applyModifiers(base: Pair[], intent: QuestIntent, sig: Signals, answers: SlotAnswers = {}): Pair[] {
   let steps = base.map(p => [...p] as Pair);
+  const get = (k: string): string | undefined => answers[k]?.trim() || undefined;
+  const map = (pred: (l: string) => boolean, next: (l: string) => string) =>
+    (steps = steps.map(([l, e]) => (pred(l) ? [next(l), e] as Pair : [l, e])));
 
-  // Length / count aware tailoring of specific steps.
-  if (intent === 'essay' && sig.wordCount) {
-    const per = Math.max(80, Math.round(sig.wordCount / 4 / 10) * 10);
-    steps = steps.map(([l, e]) =>
-      l.startsWith('Draft the body')
-        ? [`Draft the body paragraphs (~${sig.wordCount} words total, ~${per} per paragraph)`, e] as Pair
-        : [l, e]);
+  // Length / count aware tailoring of specific steps. Structured slot answers
+  // (from the clarify panel) take priority over signals parsed from free text.
+  if (intent === 'essay') {
+    const topic = get('topic');
+    const thesisStatus = get('thesisStatus');
+    const wordCount = parseNum(get('wordCount')) ?? sig.wordCount;
+    if (wordCount) {
+      const per = Math.max(80, Math.round(wordCount / 4 / 10) * 10);
+      map(l => l.startsWith('Draft the body'),
+        () => `Draft the body paragraphs (~${wordCount} words total, ~${per} per paragraph)`);
+    }
+    if (topic || thesisStatus) {
+      map(l => l.startsWith('Write a one-line thesis'), () => {
+        if (topic && thesisStatus) return `Draft a thesis about ${topic} (${thesisStatus})`;
+        if (topic) return `Draft a thesis about ${topic}`;
+        return `Write a one-line thesis / main argument — ${thesisStatus}`;
+      });
+    }
+    if (topic) map(l => l.startsWith('Outline:'),
+      l => `Outline on ${topic}: ${l.slice('Outline:'.length).trim()}`);
   }
-  if (intent === 'problem_set' && sig.itemCount) {
-    steps = steps.map(([l, e]) =>
-      l.startsWith('Skim all')
-        ? [`Skim all ${sig.itemCount} questions and tag each easy / medium / hard`, e] as Pair
-        : [l, e]);
+
+  if (intent === 'problem_set') {
+    const topic = get('topic');
+    const count = parseNum(get('count')) ?? sig.itemCount;
+    if (count) {
+      map(l => l.startsWith('Skim all'),
+        () => `Skim all ${count}${topic ? ` ${topic}` : ''} questions and tag each easy / medium / hard`);
+    } else if (topic) {
+      map(l => l.startsWith('Skim all'), () => `Skim all the ${topic} questions and tag each easy / medium / hard`);
+    }
+    if (topic) map(l => l.startsWith('Attempt the hard'),
+      () => `Do the hardest ${topic} problems first; mark anything you get stuck on`);
   }
+
   if (intent === 'reading') {
-    const ref = sig.chapters ? `chapter ${sig.chapters}` : sig.pages ? `${sig.pages} pages` : '';
-    if (ref) steps = steps.map(([l, e]) =>
-      l.startsWith('Preview') ? [`Preview ${ref}: headings, intro and summary first`, e] as Pair : [l, e]);
-  }
-  if (intent === 'presentation') {
-    if (sig.slides) steps = steps.map(([l, e]) =>
-      l.startsWith('Outline the slides') ? [`Outline ${sig.slides} slides (1 idea per slide)`, e] as Pair : [l, e]);
-    if (sig.minutes) steps.push([`Time your rehearsal to fit ~${sig.minutes} minutes`, 10]);
+    const pagesOrChapter = get('pagesOrChapter');
+    const ref = pagesOrChapter ?? (sig.chapters ? `chapter ${sig.chapters}` : sig.pages ? `${sig.pages} pages` : '');
+    if (ref) map(l => l.startsWith('Preview'), () => `Preview ${ref}: headings, intro and summary first`);
+    const mode = get('mode');
+    if (mode && /annotat/i.test(mode)) map(l => l.startsWith('Note any terms'),
+      () => 'Annotate as you go — note terms/ideas you did not understand');
   }
 
-  // Group work → add a coordination step early.
-  if (sig.isGroup) steps.splice(1, 0, ['Agree who does what with your group, and a check-in time', 10]);
+  if (intent === 'lab_report') {
+    const dataStatus = get('dataStatus');
+    const sections = get('sections');
+    if (dataStatus && /\b(no|not yet|haven'?t|need to)\b/i.test(dataStatus)) {
+      steps.unshift(['Collect/finish your raw data first', 20]);
+    }
+    if (sections) map(l => l.startsWith('Write the results'), () => `Write up the required sections (${sections})`);
+  }
+
+  if (intent === 'presentation') {
+    const audience = get('audience');
+    const minutes = parseNum(get('minutes')) ?? sig.minutes;
+    const slides = parseNum(get('slides')) ?? sig.slides;
+    if (slides) map(l => l.startsWith('Outline the slides'), () => `Outline ${slides} slides (1 idea per slide)`);
+    if (audience) map(l => l.startsWith('Decide the single message'),
+      () => `Decide the single message ${audience} should remember`);
+    if (audience || minutes) {
+      map(l => l.startsWith('Rehearse out loud'), () => {
+        if (audience && minutes) return `Rehearse aloud for ${audience} to fit ~${minutes} min`;
+        if (audience) return `Rehearse aloud for ${audience}, end to end`;
+        return `Rehearse aloud to fit ~${minutes} min`;
+      });
+    }
+  }
+
+  if (intent === 'coding') {
+    const language = get('language');
+    const mode = get('mode');
+    if (language) map(l => l.startsWith('Implement the smallest piece'),
+      () => `Scaffold the ${language} project, then implement the smallest piece that runs`);
+    if (mode && /debug|fix|bug|existing/i.test(mode)) {
+      map(l => l.startsWith('Restate the problem'), () => 'Restate the bug and the expected vs. actual behaviour');
+    }
+  }
+
+  if (intent === 'revision') {
+    const weakTopics = get('weakTopics');
+    if (weakTopics) {
+      map(l => l.startsWith('Start with one red topic'), () => `Focus revision on ${weakTopics}: re-learn from notes`);
+      map(l => l.startsWith('Practice past-paper'), () => `Practice past-paper questions on ${weakTopics}`);
+    }
+  }
+
+  if (intent === 'project') {
+    const deliverable = get('deliverable');
+    if (deliverable) map(l => l.startsWith('Write the goal'), () => `Write the goal: ${deliverable}`);
+  }
+
+  if (intent === 'memorization') {
+    const itemCount = parseNum(get('itemCount'));
+    if (itemCount) map(l => l.startsWith('Split the material'),
+      () => `Split the ${itemCount} items into small chunks (5–10 items each)`);
+  }
+
+  if (intent === 'generic') {
+    const doneLooksLike = get('doneLooksLike');
+    const firstPiece = get('firstPiece');
+    if (doneLooksLike) map(l => l.startsWith('Write down what'), () => `Finished looks like: ${doneLooksLike}`);
+    if (firstPiece) map(l => l.startsWith('Do the easiest sub-task'), () => `Start with: ${firstPiece}`);
+  }
+
+  // Group work → add a coordination step early. A "group vs solo" slot answer
+  // (e.g. on projects) overrides the free-text signal when both are present.
+  const groupOrSolo = get('groupOrSolo');
+  const isGroup = groupOrSolo ? /group|team|partner/i.test(groupOrSolo) : sig.isGroup;
+  if (isGroup) steps.splice(1, 0, ['Agree who does what with your group, and a check-in time', 10]);
 
   // Deadline awareness.
   if (sig.urgency === 'urgent') {
@@ -343,7 +441,8 @@ function applyModifiers(base: Pair[], intent: QuestIntent, sig: Signals): Pair[]
 /* ───────────────── main entry ───────────────── */
 
 function combinedText(input: BreakdownInput): string {
-  return [input.title, input.description, input.subject, (input.tags || []).join(' '), input.context]
+  const answerText = input.answers ? Object.values(input.answers).filter(Boolean).join(' ') : '';
+  return [input.title, input.description, input.subject, (input.tags || []).join(' '), input.context, answerText]
     .filter(Boolean).join(' ').trim();
 }
 
@@ -358,7 +457,7 @@ export function breakdownTask(input: BreakdownInput): QuestBreakdown {
 
   const sig = extractSignals(text, input.deadline, input.now);
   const base = TEMPLATES[intent]({ difficulty, subject: input.subject });
-  const tailored = applyModifiers(base, intent, sig);
+  const tailored = applyModifiers(base, intent, sig, input.answers);
 
   const steps: QuestStep[] = tailored.map(([label, estMinutes], i) => ({
     id: `s${i}`, label, estMinutes, ...(i === 0 ? { isStarter: true } : {}),
@@ -375,21 +474,64 @@ export function breakdownTask(input: BreakdownInput): QuestBreakdown {
 
 /* ───────────────── clarifying questions (for "regenerate") ───────────────── */
 
-const QUESTIONS: Record<QuestIntent, string[]> = {
-  essay: ['Roughly how many words?', 'Do you already have a thesis/argument, or need to form one?'],
-  problem_set: ['How many questions/problems?', 'Which topic do they cover?'],
-  reading: ['How many pages or which chapter?', 'Do you need to annotate, or just read?'],
-  lab_report: ['Which sections are required (method, results, discussion)?', 'Is the data collected yet?'],
-  presentation: ['How many minutes or slides?', 'Who is the audience?'],
-  revision: ['Which topics feel weakest?', 'Past-paper practice, or learning it for the first time?'],
-  coding: ['Which language/tool?', 'New build, or debugging existing code?'],
-  project: ['What does the finished project look like?', 'Working solo or in a group?'],
-  memorization: ['About how many items to memorise?', 'By when do you need to recall them?'],
-  generic: ['What does "done" look like for this?', 'What is the very first concrete piece?'],
+/**
+ * A clarifying question tied to a "slot" — a specific piece of missing info
+ * that, once answered, is injected verbatim into the matching step label(s)
+ * in applyModifiers (see the `answers[key]` lookups above). `key` is the
+ * property the answer is stored under in SlotAnswers.
+ */
+export interface QuestionSlot {
+  key: string;
+  question: string;
+  placeholder?: string;
+}
+
+const QUESTIONS: Record<QuestIntent, QuestionSlot[]> = {
+  essay: [
+    { key: 'topic', question: 'What is the essay about?', placeholder: 'e.g. causes of WW1' },
+    { key: 'thesisStatus', question: 'Do you already have a thesis/argument, or need to form one?' },
+    { key: 'wordCount', question: 'Roughly how many words?', placeholder: 'e.g. 1500' },
+  ],
+  problem_set: [
+    { key: 'count', question: 'How many questions/problems?', placeholder: 'e.g. 20' },
+    { key: 'topic', question: 'Which topic do they cover?', placeholder: 'e.g. quadratic equations' },
+  ],
+  reading: [
+    { key: 'pagesOrChapter', question: 'How many pages or which chapter?', placeholder: 'e.g. chapter 4' },
+    { key: 'mode', question: 'Do you need to annotate, or just read?' },
+  ],
+  lab_report: [
+    { key: 'sections', question: 'Which sections are required (method, results, discussion)?' },
+    { key: 'dataStatus', question: 'Is the data collected yet?' },
+  ],
+  presentation: [
+    { key: 'audience', question: 'Who is the audience?', placeholder: 'e.g. the class, judges' },
+    { key: 'minutes', question: 'How many minutes do you have?', placeholder: 'e.g. 5' },
+    { key: 'slides', question: 'About how many slides?', placeholder: 'e.g. 10' },
+  ],
+  revision: [
+    { key: 'weakTopics', question: 'Which topics feel weakest?', placeholder: 'e.g. trigonometry, redox reactions' },
+  ],
+  coding: [
+    { key: 'language', question: 'Which language/tool?', placeholder: 'e.g. Python' },
+    { key: 'mode', question: 'New build, or debugging existing code?' },
+  ],
+  project: [
+    { key: 'deliverable', question: 'What does the finished project look like?' },
+    { key: 'groupOrSolo', question: 'Working solo or in a group?' },
+  ],
+  memorization: [
+    { key: 'itemCount', question: 'About how many items to memorise?', placeholder: 'e.g. 40' },
+    { key: 'recallBy', question: 'By when do you need to recall them?' },
+  ],
+  generic: [
+    { key: 'doneLooksLike', question: 'What does "done" look like for this?' },
+    { key: 'firstPiece', question: 'What is the very first concrete piece?' },
+  ],
 };
 
-/** Up to 2 targeted questions to sharpen a regenerate. */
-export function clarifyingQuestions(intent: QuestIntent): string[] {
+/** Up to 3 targeted, slot-keyed questions to sharpen a regenerate. */
+export function clarifyingQuestions(intent: QuestIntent): QuestionSlot[] {
   return QUESTIONS[intent] ?? QUESTIONS.generic;
 }
 
