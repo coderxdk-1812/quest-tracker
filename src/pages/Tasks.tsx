@@ -282,6 +282,13 @@ export default function Tasks() {
             <SelectItem value="overdue">Overdue</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="Sort by" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="deadline">Sort: Deadline</SelectItem>
+            <SelectItem value="priority">Sort: Priority</SelectItem>
+          </SelectContent>
+        </Select>
         <Select value={priorityFilter} onValueChange={v => setPriorityFilter(v as typeof priorityFilter)}>
           <SelectTrigger className="w-36"><SelectValue placeholder="Priority" /></SelectTrigger>
           <SelectContent>
