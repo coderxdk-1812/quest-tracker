@@ -1,6 +1,12 @@
 """
-Augments the hand-authored scenarios (scenarios.py) into a large set of
-concrete Examples for all three task types. Pure stdlib.
+Augments the hand-authored scenarios (scenarios/) into a set of concrete
+Examples for all three task types. Pure stdlib.
+
+Deliberately LOW fan-out per scenario (see VARIANTS_PER_SCENARIO) — with
+~250 distinct, genuinely-authored scenarios, diversity should come from
+scenario count, not from squeezing hundreds of near-duplicate numeric
+variants out of a handful of templates (that was the original bug: 20
+scenarios x 220 variants = 17,600 rows the model just memorized).
 
 Usage: python3 generate.py > /tmp/preview.jsonl   (or import generate_all())
 """
@@ -18,7 +24,7 @@ from pools import rng
 from scenarios import all_scenarios, render_list
 import schema
 
-VARIANTS_PER_SCENARIO = 220
+VARIANTS_PER_SCENARIO = 6
 _NOW = datetime.datetime(2026, 7, 15, 12, 0, 0, tzinfo=datetime.timezone.utc)
 
 
@@ -32,10 +38,14 @@ def _build_task(scenario, v: dict) -> dict:
     tags = list(v.get("tags", []))
     if v.get("group_kind") == "group" and "group-project" not in tags:
         tags = tags + ["group-project"]
+    description = None
+    if scenario.description_tpl and not v.get("_omit_description"):
+        description = scenario.description_tpl.format(**v)
+    subject = None if v.get("_omit_subject") else v.get("subject")
     return schema.make_task_json(
         title=scenario.title_tpl.format(**v),
-        description=scenario.description_tpl.format(**v) if scenario.description_tpl else None,
-        subject=v.get("subject"),
+        description=description,
+        subject=subject,
         intent=scenario.intent,
         priority=v["priority"],
         deadline=_deadline_iso(v["_deadline_hours"]),

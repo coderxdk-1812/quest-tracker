@@ -25,8 +25,8 @@ fine-tuning run**, which needs a GPU this environment doesn't have:
 | Phase | Status |
 |---|---|
 | 1. Task design / schemas | ✅ Done — `schema.py` |
-| 2. Dataset generation + validation | ✅ Done and committed — 17,600 examples, 0 validation failures, `data/processed/{train,val,test}.jsonl` |
-| 3. Training script | ✅ Script complete; **CPU smoke config verified with a real run** (loss 3.57→0.87, eval_loss 2.20→1.39, checkpointing on best val loss confirmed). The full GPU config has **not** been run here. |
+| 2. Dataset generation + validation | ✅ Done and committed — **250 distinct hand-authored scenarios** (25/intent), 6,000 examples, 0 validation failures, `data/processed/{train,val,test}.jsonl`. Rebuilt from scratch after an earlier version (~20 scenarios × 220 near-duplicate variants = 17,600 rows) trained a model that had just memorized 20 templates — see "Dataset" below for what changed and the diversity numbers proving it. |
+| 3. Training script | ✅ Script complete; **CPU smoke config re-verified against the new 250-scenario dataset** (ran to completion — final training loss 3.38 avg / 1.87 last-logged, eval_loss 3.00, checkpointing on best val loss confirmed). Not a real trained model — 12 examples, 2 epochs, purely a pipeline check. The full GPU config has **not** been run here — `fp16` is deliberately off in both full configs (T5 diverges to NaN in fp16; `train.py` also hard-guards against it regardless of config). |
 | 4. Evaluation script | ✅ Script complete; **smoke-tested against the base (non-fine-tuned) model** to prove the mechanics (JSON-validity/ROUGE/rubric scoring, report writing, acceptance-threshold checking) — scored 0%, as expected for an un-fine-tuned model. Has not been run against a real trained checkpoint. |
 | 5. ONNX conversion | ✅ Script complete; **verified end-to-end against a smoke checkpoint** (97.5MB quantized output, under the 150MB budget). Has not been run against a real trained checkpoint. |
 | 6. Browser integration | ✅ Done and wired — `src/lib/localModel.ts`, Settings toggle, `QuestBreakdown.tsx`. `MODEL_ID` is a placeholder until a real model is hosted (see below); every call correctly falls back to the rule engine until then. |
@@ -59,17 +59,35 @@ cd ml/data
 python3 build_dataset.py                 # writes processed/{train,val,test}.jsonl
 ```
 
-`scenarios.py` holds ~20 hand-authored, realistic scenarios (2 per intent ×
-10 intents: essay, problem_set, reading, lab_report, presentation, revision,
-coding, project, memorization, generic). Each scenario is a coherent
-situation — the same topic/subject/vars drive the task title, the concrete
-breakdown steps, a "vague" variant of those steps used as clarify's input (1
-step deliberately swapped for a filler like "Research the topic"), the
-clarify question targeting that exact swapped index, the user's answer, and
-the refined steps that weave the answer in. `generate.py` programmatically
-augments each scenario (subject, item/word/slide counts, deadlines, group vs
-solo, priority, tags) into ~220 variants, fanning out to breakdown + clarify
-(+ a "no vague steps → `[]`" negative example) + refine examples.
+`scenarios/` (a package, one file per intent) holds **250 hand-authored,
+realistic scenarios — 25 per intent** across essay, problem_set, reading,
+lab_report, presentation, revision, coding, project, memorization, and
+generic. This is the second version of the dataset; the first version had
+~20 scenarios blown up into 17,600 rows via heavy per-scenario augmentation
+(~220 variants each), and the resulting model had just memorized those 20
+templates (~65% JSON-valid, clarify worst at 50%, project/generic at 25%).
+The fix wasn't more augmentation, it was more *scenarios*: each of the 250
+has its own fixed topic/subject and genuinely different title phrasing (some
+terse and lowercase, some verbose, some with a typo, some formal) and
+genuinely different step content — no shared "8 topics × 2 skeletons" pool
+for the content that actually varies. Only the legitimately-variable
+surface details (word/item/slide counts, deadline urgency, priority, tags,
+group-vs-solo, and whether `description`/`subject` are even filled in) come
+from shared pools in `pools.py`.
+
+Each scenario is a coherent situation: the same topic drives the task
+title, the concrete breakdown steps, a "vague" variant of those steps used
+as clarify's input (1-3 steps deliberately swapped for a filler like
+"Research the topic"), the clarify question(s) targeting those exact
+swapped indices, the user's answer(s), and the refined steps that weave the
+answer in — not append it. `generate.py` samples each scenario **6** times
+(deliberately low fan-out — diversity comes from 250 distinct scenarios,
+not from squeezing hundreds of variants out of a few), fanning out to
+breakdown + clarify (+ a "no vague steps → `[]`" negative example, generated
+from every scenario's fully-specific step list) + refine. That's 250 × 6 ×
+4 = 6,000 rows, with clarify deliberately 2x breakdown/refine (3,000 vs
+1,500 each) per the "over-invest in clarify" requirement — it was the
+weakest and most important task.
 
 `build_dataset.py` then validates every example against `schema.py`'s
 validators (JSON parses, steps aren't bare generic placeholders, clarify
@@ -78,13 +96,56 @@ and reflects the answer) — drops/reports any failure — and splits 80/10/10,
 grouped so every example from one rendered scenario instance stays in a
 single split (no leakage), stratified by intent.
 
-Current committed dataset: **17,600 examples, 0 validation failures** —
-4,400 breakdown / 8,800 clarify / 4,400 refine, balanced 440/440 per intent
-per task across breakdown+refine, split into train (14,080) / val (1,760) /
-test (1,760).
+Current committed dataset: **6,000 examples, 0 validation failures** —
+1,500 breakdown / 3,000 clarify / 1,500 refine, perfectly balanced 600 per
+intent, split into train (4,800) / val (600) / test (600). Real output from
+`python3 build_dataset.py`:
+```
+[build_dataset] 0 validation failures out of 6000 generated examples.
+[build_dataset] wrote:
+  train: 4800 examples  {'breakdown': 1200, 'clarify': 2400, 'refine': 1200}
+  val: 600 examples  {'breakdown': 150, 'clarify': 300, 'refine': 150}
+  test: 600 examples  {'breakdown': 150, 'clarify': 300, 'refine': 150}
+[build_dataset] no train/val/test leakage confirmed.
 
-To grow the dataset (e.g. after error analysis — see below), add more
-scenarios to `scenarios.py` or widen the pools in `pools.py`, then rerun.
+[build_dataset] diversity report:
+  distinct hand-authored scenarios: 250
+  total examples: 6000
+  distinct task instances (dedupes breakdown/clarify+/clarify-/refine sharing one task): 1500
+  by task_type: {'breakdown': 1500, 'clarify': 3000, 'refine': 1500}
+  by intent: {'coding': 600, 'essay': 600, 'generic': 600, 'lab_report': 600, 'memorization': 600,
+              'presentation': 600, 'problem_set': 600, 'project': 600, 'reading': 600, 'revision': 600}
+  distinct titles: 317  (0.2113 of task instances, 0.0528 of all rows — the latter is
+              structurally capped at 0.25 since one task instance always yields 4 rows)
+  distinct step-sets (breakdown+refine): 938  (0.3127 of breakdown+refine rows)
+  distinct question-sets (clarify): 254  (0.0847 of clarify rows)
+```
+Two of those numbers look lower than they are without context: **distinct
+titles** is capped at 25% of total rows no matter how varied the dataset is
+(one task instance structurally produces 4 rows sharing one title) — the
+21.13%-of-task-instances figure is the real signal, and it's driven by
+scenarios that deliberately use a *static* title (no `{word_count}`-style
+variable in it), which is realistic — plenty of real students type a bare
+title and leave the details in the description or nowhere at all. **Distinct
+question-sets** is low because 1,500 of the 3,000 clarify rows are the
+negative `[]` case by design (same trivial target, on purpose — that's the
+"say so instead of asking filler questions" signal), and each scenario's
+positive question wording is intentionally fixed (a real clarifying
+question about *this specific vague step*, not reworded 6 different ways)
+— so the ~254 distinct question-sets is close to "one real, topic-grounded
+question per scenario," which is the actual goal, not a shortfall.
+
+Building this dataset also surfaced a real authoring bug: 70 scenarios had
+a leftover generic-filler word (`"Prepare"`, `"Get started"`, `"Study"`,
+etc.) sitting directly in `breakdown_steps_tpl` — a copy/paste residue from
+drafting — instead of genuine step content. `schema.py`'s validator caught
+every one (that's what "0 validation failures" is actually proving isn't
+trivial), and all 70 were rewritten with real, scenario-specific content
+before this dataset was committed.
+
+To grow the dataset (e.g. after error analysis — see "Iterate & retrain"
+below), add more scenarios to `scenarios/<intent>.py` or widen the pools in
+`pools.py`, then rerun `build_dataset.py`.
 
 ### 2. Train
 
@@ -105,7 +166,8 @@ python3 train.py --config configs/smoke.json
 # Full run — needs a GPU (local CUDA, or a Colab notebook: `!pip install -r
 # requirements.txt && !python3 train.py --config configs/full.json`, with
 # ml/ uploaded or git-cloned into the Colab runtime first). ~8 epochs over
-# 14,080 examples; expect on the order of 30-90 minutes on a single T4.
+# 4,800 train examples; expect well under an hour on a single T4 (fp32, no
+# fp16 — see the fp16 note above).
 python3 train.py --config configs/full.json
 
 # If flan-t5-small doesn't clear the eval bar, scale up — same pipeline,
@@ -146,16 +208,29 @@ analysis, and checks against the acceptance criteria:
 **Iterate & retrain, don't just ship a bad number.** Open
 `eval_report.json`, sort by `rubric_pass: false`, and look at what's failing
 per intent/task_type in `summary.by_intent` / `summary.by_task_type`. If one
-intent or task type is consistently weak:
-1. Add more/better scenarios for it in `ml/data/scenarios.py` (or widen its
-   pools in `pools.py`), targeting the specific failure pattern you saw.
-2. Rerun `build_dataset.py`.
+or two intents or task types are consistently weak while the rest are fine,
+that's a data problem — the dataset already learned this lesson once (see
+"Dataset" above: 20 templates blown up into 17,600 clones scored ~65%
+overall with clarify at 50% and project/generic at 25% — the fix was
+authoring more distinct scenarios, not more augmentation):
+1. Add more/better scenarios for the weak intent(s) in
+   `ml/data/scenarios/<intent>.py` (or widen `pools.py`'s shared pools),
+   targeting the specific failure pattern you saw — genuinely different
+   topics and phrasing, not parametric clones of what's already there.
+2. Rerun `build_dataset.py` and check the diversity report hasn't regressed.
 3. Retrain (`train.py --config configs/full.json`) — the config's
    `output_dir` is separate per run, so old checkpoints aren't clobbered;
    bump it (e.g. `runs/full_v2`) if you want to compare.
 4. Re-run `eval.py` and recheck the acceptance table.
 
-Only move to conversion once `acceptance` in the eval report is all `true`.
+If instead the model is *broadly* weak across every intent and task type
+even with the current 250-scenario dataset — i.e. the data isn't
+templated/thin anymore but flan-t5-small still can't clear the bar — that's
+a capacity problem, not a data problem. The next lever is
+**`configs/full_base.json`** (scales to `flan-t5-base`), not more scenarios:
+adding yet more data to fix a capacity ceiling is a diminishing-returns
+trap. Only move to conversion once `acceptance` in the eval report is all
+`true`.
 
 ### 4. Convert for the browser
 
@@ -218,6 +293,17 @@ and don't need to change.
   one, change both, and re-run the tests in `localModel.test.ts`.
 - **Why validation is this strict.** The dataset is the model's only signal.
   A single mis-authored "good" step that's secretly generic (this happened
-  during authoring — `schema.py`'s validator caught 13 scenarios where a
-  filler phrase leaked into the "good" template) trains the model to think
-  that's acceptable output. The validator is a hard gate, not a lint warning.
+  during authoring — `schema.py`'s validator caught 70 scenarios where a
+  filler phrase like `"Prepare"` or `"Get started"` had leaked into the
+  "good" `breakdown_steps_tpl` template, plus one `refine_steps_tpl` that
+  didn't actually reflect its own answer) trains the model to think that's
+  acceptable output. The validator is a hard gate, not a lint warning — see
+  "Dataset" above for what got caught and fixed.
+- **Why 250 scenarios at 6 variants each, not 20 at 220.** More rows isn't
+  more signal if they're paraphrases of each other — a model trained on
+  17,600 rows generated from 20 templates learned the 20 templates, not the
+  underlying skill. Scenario *count* is what teaches generalization; the
+  per-scenario variant count just adds realistic surface noise (deadlines,
+  counts, missing fields) on top of content that's already genuinely
+  different. See `diversity_report()` in `build_dataset.py` for the metrics
+  that keep this honest on every rebuild.
