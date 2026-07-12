@@ -26,7 +26,7 @@ fine-tuning run**, which needs a GPU this environment doesn't have:
 |---|---|
 | 1. Task design / schemas | ✅ Done — `schema.py` |
 | 2. Dataset generation + validation | ✅ Done and committed — **250 distinct hand-authored scenarios** (25/intent), 6,000 examples, 0 validation failures, `data/processed/{train,val,test}.jsonl`. Rebuilt from scratch after an earlier version (~20 scenarios × 220 near-duplicate variants = 17,600 rows) trained a model that had just memorized 20 templates — see "Dataset" below for what changed and the diversity numbers proving it. |
-| 3. Training script | ✅ Script complete; **CPU smoke config re-verified against the new 250-scenario dataset** (ran to completion — final training loss 3.38 avg / 1.87 last-logged, eval_loss 3.00, checkpointing on best val loss confirmed). Not a real trained model — 12 examples, 2 epochs, purely a pipeline check. The full GPU config has **not** been run here — `fp16` is deliberately off in both full configs (T5 diverges to NaN in fp16; `train.py` also hard-guards against it regardless of config). |
+| 3. Training script | ✅ Script complete; **CPU smoke config re-verified against the new 250-scenario dataset** (ran to completion — final training loss 3.38 avg / 1.87 last-logged, eval_loss 3.00, checkpointing on best val loss confirmed). Not a real trained model — 12 examples, 2 epochs, purely a pipeline check. **Local MPS (Apple Silicon) was tried for the real full run**: it works correctly — no operator errors — but this machine's 8GB unified memory thrashed into swap (14.7/15.4GB swap used) and projected ~12 hours, so it was stopped as impractical, not because MPS itself failed. `ml/colab_train.ipynb` is a ready-to-run notebook for a free-tier T4 instead — the full GPU config has **not** actually been run to completion anywhere yet. `fp16` is deliberately off in both full configs (T5 diverges to NaN in fp16; `train.py` also hard-guards against it regardless of config). |
 | 4. Evaluation script | ✅ Script complete; **smoke-tested against the base (non-fine-tuned) model** to prove the mechanics (JSON-validity/ROUGE/rubric scoring, report writing, acceptance-threshold checking) — scored 0%, as expected for an un-fine-tuned model. Has not been run against a real trained checkpoint. |
 | 5. ONNX conversion | ✅ Script complete; **verified end-to-end against a smoke checkpoint** (97.5MB quantized output, under the 150MB budget). Has not been run against a real trained checkpoint. |
 | 6. Browser integration | ✅ Done and wired — `src/lib/localModel.ts`, Settings toggle, `QuestBreakdown.tsx`. `MODEL_ID` is a placeholder until a real model is hosted (see below); every call correctly falls back to the rule engine until then. |
@@ -163,17 +163,25 @@ TS port — keep all three in sync if you ever change the schema).
 # Not a real model — do not evaluate/ship its output.
 python3 train.py --config configs/smoke.json
 
-# Full run — needs a GPU (local CUDA, or a Colab notebook: `!pip install -r
-# requirements.txt && !python3 train.py --config configs/full.json`, with
-# ml/ uploaded or git-cloned into the Colab runtime first). ~8 epochs over
-# 4,800 train examples; expect well under an hour on a single T4 (fp32, no
-# fp16 — see the fp16 note above).
+# Full run — needs a GPU. Local CUDA works as-is. Local Apple Silicon (MPS)
+# was tried here: it works correctly (no operator errors), but on an 8GB
+# unified-memory machine it thrashes into swap and projects ~12 hours for
+# this run — not practical. ~8 epochs over 4,800 train examples; expect well
+# under an hour on a single T4 (fp32, no fp16 — see the fp16 note above).
 python3 train.py --config configs/full.json
 
 # If flan-t5-small doesn't clear the eval bar, scale up — same pipeline,
 # just a bigger base model and adjusted batch size/grad-accum:
 python3 train.py --config configs/full_base.json
 ```
+
+**No local GPU with enough memory? Use `ml/colab_train.ipynb`.** Upload it
+to [colab.research.google.com](https://colab.research.google.com), set
+`Runtime > Change runtime type > T4 GPU`, and run the cells top to bottom —
+it clones this (public) repo, installs `ml/requirements.txt`, runs
+`configs/full.json`, evaluates against the acceptance criteria, converts to
+ONNX if it passes, and downloads the result as a zip. Free-tier T4 is
+sufficient; the whole run fits well within free-tier session limits.
 
 Checkpointing is on best `eval_loss` (`load_best_model_at_end=True`), so the
 saved model in `runs/full/` is always the best-val checkpoint, not just the
