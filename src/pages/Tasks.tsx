@@ -95,6 +95,7 @@ export default function Tasks() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'overdue'>('all');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Priority>('all');
+  const [sortBy, setSortBy] = useState<'deadline' | 'priority'>('deadline');
 
   const [savedSubjects, setSavedSubjects] = useState<string[]>(() => getSavedSubjects());
   useEffect(() => subscribeSavedSubjects(() => setSavedSubjects(getSavedSubjects())), []);
@@ -224,13 +225,20 @@ export default function Tasks() {
     });
     list = [...list].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (sortBy === 'priority') {
+        const pd = PRIORITY_CONFIG[b.priority].weight - PRIORITY_CONFIG[a.priority].weight;
+        if (pd !== 0) return pd;
+        const aT = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+        const bT = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+        return aT - bT;
+      }
       const aT = a.deadline ? new Date(a.deadline).getTime() : Infinity;
       const bT = b.deadline ? new Date(b.deadline).getTime() : Infinity;
       if (aT !== bT) return aT - bT;
       return PRIORITY_CONFIG[b.priority].weight - PRIORITY_CONFIG[a.priority].weight;
     });
     return list;
-  }, [state.tasks, search, statusFilter, subjectFilter, priorityFilter]);
+  }, [state.tasks, search, statusFilter, subjectFilter, priorityFilter, sortBy]);
 
   const reduced = prefersReducedMotion();
   const headerItem = reduced
@@ -272,6 +280,13 @@ export default function Tasks() {
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="overdue">Overdue</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={v => setSortBy(v as typeof sortBy)}>
+          <SelectTrigger className="w-40"><SelectValue placeholder="Sort by" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="deadline">Sort: Deadline</SelectItem>
+            <SelectItem value="priority">Sort: Priority</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={v => setPriorityFilter(v as typeof priorityFilter)}>
