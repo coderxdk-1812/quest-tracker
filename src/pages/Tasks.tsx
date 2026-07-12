@@ -95,6 +95,7 @@ export default function Tasks() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'completed' | 'overdue'>('all');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<'all' | Priority>('all');
+  const [sortBy, setSortBy] = useState<'deadline' | 'priority'>('deadline');
 
   const [savedSubjects, setSavedSubjects] = useState<string[]>(() => getSavedSubjects());
   useEffect(() => subscribeSavedSubjects(() => setSavedSubjects(getSavedSubjects())), []);
