@@ -225,13 +225,20 @@ export default function Tasks() {
     });
     list = [...list].sort((a, b) => {
       if (a.completed !== b.completed) return a.completed ? 1 : -1;
+      if (sortBy === 'priority') {
+        const pd = PRIORITY_CONFIG[b.priority].weight - PRIORITY_CONFIG[a.priority].weight;
+        if (pd !== 0) return pd;
+        const aT = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+        const bT = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+        return aT - bT;
+      }
       const aT = a.deadline ? new Date(a.deadline).getTime() : Infinity;
       const bT = b.deadline ? new Date(b.deadline).getTime() : Infinity;
       if (aT !== bT) return aT - bT;
       return PRIORITY_CONFIG[b.priority].weight - PRIORITY_CONFIG[a.priority].weight;
     });
     return list;
-  }, [state.tasks, search, statusFilter, subjectFilter, priorityFilter]);
+  }, [state.tasks, search, statusFilter, subjectFilter, priorityFilter, sortBy]);
 
   const reduced = prefersReducedMotion();
   const headerItem = reduced
